@@ -4,7 +4,6 @@ import React, { useState, useRef, useEffect } from "react";
 import { commandDrillsData } from "@/data/commandDrills";
 import { CommandDrill, DifficultyLevel, MistakeRecord } from "@/types/game";
 import {
-  Terminal,
   CheckCircle2,
   XCircle,
   Lightbulb,
@@ -12,7 +11,6 @@ import {
   Eye,
   Flame,
   Send,
-  Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
@@ -85,7 +83,7 @@ export const CommandDrillMode: React.FC<CommandDrillModeProps> = ({
         particleCount: 45,
         spread: 55,
         origin: { y: 0.75 },
-        colors: ["#10b981", "#f59e0b"],
+        colors: ["#10b981", "#3b82f6"],
       });
       onPassDrill(activeDrill, bonusXp);
     } else {
@@ -121,22 +119,22 @@ export const CommandDrillMode: React.FC<CommandDrillModeProps> = ({
   return (
     <div className="space-y-6">
       {/* Header & Difficulty Selector */}
-      <div className="flex flex-wrap items-center justify-between gap-4 p-5 rounded-2xl border border-[#1e2330] bg-[#12151d]/90 backdrop-blur-xl">
+      <div className="flex flex-wrap items-center justify-between gap-4 p-5 rounded-2xl border border-slate-800 bg-slate-900/90 backdrop-blur-xl shadow-saas-card">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <span className="px-2 py-0.5 rounded text-[10px] font-mono uppercase tracking-wider bg-amber-500/15 text-amber-400 border border-amber-500/30 font-bold">
+            <span className="px-2 py-0.5 rounded text-[10px] font-mono uppercase tracking-wider bg-blue-500/15 text-blue-400 border border-blue-500/30 font-bold">
               Mode 2 &bull; Interactive CLI Command Drills
             </span>
-            <span className="text-xs text-zinc-500 font-mono">
+            <span className="text-xs text-slate-400 font-mono">
               {completedDrillIds.length}/{commandDrillsData.length} validés
             </span>
           </div>
-          <h1 className="text-xl sm:text-2xl font-extrabold text-zinc-100">
+          <h1 className="text-xl sm:text-2xl font-extrabold text-slate-100">
             Terminal Interactif &mdash; Entraînement Intensif aux Commandes
           </h1>
         </div>
 
-        <div className="flex items-center gap-1.5 p-1 rounded-xl bg-[#090a0f] border border-[#1e2330]">
+        <div className="flex items-center gap-1.5 p-1 rounded-xl bg-slate-950 border border-slate-800">
           {(["All", "Junior", "Mid", "DevOps Lead"] as const).map((lvl) => (
             <button
               key={lvl}
@@ -150,8 +148,8 @@ export const CommandDrillMode: React.FC<CommandDrillModeProps> = ({
               className={cn(
                 "px-3 py-1.5 rounded-lg text-xs font-mono font-semibold transition-all",
                 selectedDifficulty === lvl
-                  ? "bg-gradient-to-r from-amber-500 to-yellow-600 text-zinc-950"
-                  : "text-zinc-400 hover:text-zinc-200"
+                  ? "bg-gradient-to-r from-[#3b82f6] to-[#6366f1] text-white"
+                  : "text-slate-400 hover:text-slate-200"
               )}
             >
               {lvl === "All" ? "Tous Niveaux" : lvl}
@@ -173,28 +171,28 @@ export const CommandDrillMode: React.FC<CommandDrillModeProps> = ({
                 className={cn(
                   "w-full p-3.5 rounded-xl border text-left transition-all flex items-center justify-between gap-3",
                   isSelected
-                    ? "bg-[#12151d] border-amber-500/60 shadow-gold-glow/20"
-                    : "bg-[#12151d]/50 border-[#1e2330] hover:bg-[#12151d]"
+                    ? "bg-slate-900 border-blue-500/60 shadow-tech-glow"
+                    : "bg-slate-900/60 border-slate-800 hover:bg-slate-900 hover:border-slate-700"
                 )}
               >
                 <div className="min-w-0 space-y-1">
                   <div className="flex items-center gap-2">
-                    <span className="font-mono text-[10px] text-zinc-500">
+                    <span className="font-mono text-[10px] text-slate-500">
                       #{idx + 1}
                     </span>
                     <Badge variant={diffVariant(drill.difficulty)}>
                       {drill.difficulty}
                     </Badge>
-                    <span className="text-[10px] font-mono text-amber-400">
+                    <span className="text-[10px] font-mono text-emerald-400">
                       +{drill.xpReward} XP
                     </span>
                   </div>
-                  <div className="text-xs font-semibold text-zinc-200 truncate">
+                  <div className="text-xs font-semibold text-slate-200 truncate">
                     {drill.scenarioContext}
                   </div>
                 </div>
                 {isDone && (
-                  <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                  <CheckCircle2 className="w-4 h-4 text-[#10b981] flex-shrink-0" />
                 )}
               </button>
             );
@@ -207,19 +205,19 @@ export const CommandDrillMode: React.FC<CommandDrillModeProps> = ({
             key={activeDrill.id}
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
-            className="rounded-2xl border border-[#1e2330] bg-[#12151d]/95 overflow-hidden shadow-subtle-card"
+            className="rounded-2xl border border-slate-800 bg-slate-900/90 overflow-hidden shadow-saas-card"
           >
             {/* Top Bar */}
-            <div className="flex flex-wrap items-center justify-between gap-2 px-5 py-3.5 bg-[#090a0f] border-b border-[#1e2330]">
+            <div className="flex flex-wrap items-center justify-between gap-2 px-5 py-3.5 bg-slate-950/80 border-b border-slate-800">
               <div className="flex items-center gap-2.5">
                 <div className="flex gap-1.5">
-                  <span className="w-2.5 h-2.5 rounded-full bg-red-500/80" />
-                  <span className="w-2.5 h-2.5 rounded-full bg-amber-500/80" />
-                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500/80" />
+                  <span className="w-2.5 h-2.5 rounded-full bg-[#f43f5e]/80" />
+                  <span className="w-2.5 h-2.5 rounded-full bg-[#f59e0b]/80" />
+                  <span className="w-2.5 h-2.5 rounded-full bg-[#10b981]/80" />
                 </div>
-                <span className="text-xs font-mono text-zinc-400 ml-2">
+                <span className="text-xs font-mono text-slate-400 ml-2">
                   {activeDrill.category} &bull;{" "}
-                  <strong className="text-amber-400">{activeDrill.scenarioContext}</strong>
+                  <strong className="text-blue-400">{activeDrill.scenarioContext}</strong>
                 </span>
               </div>
 
@@ -239,10 +237,10 @@ export const CommandDrillMode: React.FC<CommandDrillModeProps> = ({
             {/* Mission Prompt Body */}
             <div className="p-6 space-y-5">
               <div className="space-y-2">
-                <span className="text-[11px] font-mono uppercase tracking-wider text-cyan-400 font-bold">
+                <span className="text-[11px] font-mono uppercase tracking-wider text-blue-400 font-bold">
                   Mission CLI :
                 </span>
-                <h2 className="text-base sm:text-lg font-bold text-zinc-100 leading-relaxed">
+                <h2 className="text-base sm:text-lg font-bold text-slate-100 leading-relaxed">
                   {activeDrill.prompt}
                 </h2>
               </div>
@@ -251,15 +249,15 @@ export const CommandDrillMode: React.FC<CommandDrillModeProps> = ({
               <form onSubmit={handleSubmit} className="space-y-3">
                 <div
                   className={cn(
-                    "flex items-center gap-3 px-4 py-3.5 rounded-xl bg-[#090a0f] border-2 font-mono text-sm transition-all",
+                    "flex items-center gap-3 px-4 py-3.5 rounded-xl bg-slate-950 border-2 font-mono text-sm transition-all",
                     status === "correct"
-                      ? "border-emerald-500/70 shadow-emerald-glow/30"
+                      ? "border-emerald-500/70 shadow-emerald-glow"
                       : status === "wrong"
-                      ? "border-red-500/70"
-                      : "border-[#1e2330] focus-within:border-amber-500/60"
+                      ? "border-rose-500/70 shadow-rose-glow"
+                      : "border-slate-800 focus-within:border-blue-500/70"
                   )}
                 >
-                  <span className="text-emerald-400 font-bold select-none">
+                  <span className="text-[#10b981] font-bold select-none">
                     devops@drill:~$
                   </span>
                   <input
@@ -271,7 +269,7 @@ export const CommandDrillMode: React.FC<CommandDrillModeProps> = ({
                       if (status === "wrong") setStatus("idle");
                     }}
                     placeholder="Tapez la commande exacte ici et appuyez sur Entrée..."
-                    className="flex-1 bg-transparent text-zinc-100 placeholder-zinc-600 focus:outline-none font-mono"
+                    className="flex-1 bg-transparent text-slate-100 placeholder-slate-600 focus:outline-none font-mono"
                     autoFocus
                   />
                   <Button type="submit" variant="primary" size="sm">
@@ -304,7 +302,7 @@ export const CommandDrillMode: React.FC<CommandDrillModeProps> = ({
                     <button
                       type="button"
                       onClick={handleRevealAnswer}
-                      className="text-xs font-mono text-zinc-500 hover:text-zinc-300 flex items-center gap-1"
+                      className="text-xs font-mono text-slate-400 hover:text-slate-200 flex items-center gap-1"
                     >
                       <Eye className="w-3.5 h-3.5" />
                       Révéler la solution
@@ -313,7 +311,7 @@ export const CommandDrillMode: React.FC<CommandDrillModeProps> = ({
                   <button
                     type="button"
                     onClick={handleNextDrill}
-                    className="text-xs font-mono text-cyan-400 hover:text-cyan-300 flex items-center gap-1"
+                    className="text-xs font-mono text-blue-400 hover:text-blue-300 flex items-center gap-1"
                   >
                     Passer au drill suivant
                     <ArrowRight className="w-3.5 h-3.5" />
@@ -322,7 +320,7 @@ export const CommandDrillMode: React.FC<CommandDrillModeProps> = ({
               </div>
 
               {showHint && (
-                <div className="p-3 rounded-xl bg-amber-950/20 border border-amber-500/30 text-xs font-mono text-amber-200">
+                <div className="p-3 rounded-xl bg-amber-950/25 border border-amber-500/30 text-xs font-mono text-amber-200">
                   💡 <strong>Indice :</strong> {activeDrill.hint}
                 </div>
               )}
@@ -335,7 +333,7 @@ export const CommandDrillMode: React.FC<CommandDrillModeProps> = ({
                   className="p-4 rounded-xl bg-emerald-950/25 border border-emerald-500/40 space-y-2.5"
                 >
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-emerald-400 flex items-center gap-1.5">
+                    <span className="text-xs font-bold text-[#10b981] flex items-center gap-1.5">
                       <CheckCircle2 className="w-4 h-4" />
                       COMMANDE VALIDÉE ! (+
                       {Math.round(activeDrill.xpReward * streakMultiplier)} XP)
@@ -344,10 +342,10 @@ export const CommandDrillMode: React.FC<CommandDrillModeProps> = ({
                       $ {activeDrill.canonicalCommand}
                     </span>
                   </div>
-                  <pre className="p-3 rounded-lg bg-[#090a0f] border border-[#1e2330] font-mono text-xs text-zinc-300 whitespace-pre-wrap">
+                  <pre className="p-3 rounded-lg bg-slate-950 border border-slate-800 font-mono text-xs text-slate-300 whitespace-pre-wrap">
                     {activeDrill.simulatedOutput}
                   </pre>
-                  <p className="text-xs text-zinc-300 leading-relaxed">
+                  <p className="text-xs text-slate-300 leading-relaxed">
                     {activeDrill.explanation}
                   </p>
                 </motion.div>
@@ -357,29 +355,29 @@ export const CommandDrillMode: React.FC<CommandDrillModeProps> = ({
                 <motion.div
                   initial={{ x: -8 }}
                   animate={{ x: 0 }}
-                  className="p-4 rounded-xl bg-red-950/25 border border-red-500/40 space-y-2"
+                  className="p-4 rounded-xl bg-rose-950/25 border border-rose-500/40 space-y-2"
                 >
-                  <div className="flex items-center justify-between text-xs font-bold text-red-400">
+                  <div className="flex items-center justify-between text-xs font-bold text-[#f43f5e]">
                     <span className="flex items-center gap-1.5">
                       <XCircle className="w-4 h-4" />
-                      Syntaxe ou commande incorrecte (Ajoutée au Journal d&apos;Erreurs)
+                      Syntaxe ou commande incorrecte (Consignée dans le Journal d&apos;Erreurs)
                     </span>
                   </div>
-                  <p className="text-xs text-zinc-300 font-mono">
-                    Votre saisie : <code className="text-red-300">{lastAttempt}</code>
+                  <p className="text-xs text-slate-300 font-mono">
+                    Votre saisie : <code className="text-rose-300">{lastAttempt}</code>
                   </p>
-                  <p className="text-xs text-zinc-400">
+                  <p className="text-xs text-slate-400">
                     Vérifiez les options ou cliquez sur « Afficher un indice » ci-dessus.
                   </p>
                 </motion.div>
               )}
 
               {status === "revealed" && (
-                <div className="p-4 rounded-xl bg-zinc-900/90 border border-amber-500/40 space-y-2">
+                <div className="p-4 rounded-xl bg-slate-950 border border-amber-500/40 space-y-2">
                   <div className="text-xs font-mono text-amber-300 font-bold">
                     Solution canonique : $ {activeDrill.canonicalCommand}
                   </div>
-                  <p className="text-xs text-zinc-300 leading-relaxed">
+                  <p className="text-xs text-slate-300 leading-relaxed">
                     {activeDrill.explanation}
                   </p>
                 </div>

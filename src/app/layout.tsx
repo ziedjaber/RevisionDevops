@@ -27,7 +27,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="fr" className="dark">
-      <body className="font-sans antialiased text-zinc-100 min-h-screen flex flex-col bg-[#090A0F]">
+      <body className="font-sans antialiased text-slate-100 min-h-screen flex flex-col bg-[#0b0f17]">
         {children}
       </body>
     </html>

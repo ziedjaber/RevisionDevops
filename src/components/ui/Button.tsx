@@ -2,7 +2,7 @@ import React from "react";
 import { cn } from "@/lib/utils";
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: "primary" | "secondary" | "outline" | "ghost" | "cyan" | "danger";
+  variant?: "primary" | "secondary" | "outline" | "ghost" | "cyan" | "emerald" | "danger";
   size?: "sm" | "md" | "lg";
   icon?: React.ReactNode;
 }
@@ -17,18 +17,21 @@ export const Button: React.FC<ButtonProps> = ({
   ...props
 }) => {
   const baseStyles =
-    "inline-flex items-center justify-center font-medium rounded-xl transition-all duration-200 select-none disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98]";
+    "inline-flex items-center justify-center font-sans font-medium rounded-xl transition-all duration-200 select-none disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98]";
 
   const variantStyles = {
     primary:
-      "bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-zinc-950 font-semibold shadow-gold-glow border border-amber-400/40",
+      "bg-gradient-to-r from-[#3b82f6] to-[#6366f1] hover:from-blue-500 hover:to-indigo-500 text-white font-semibold shadow-tech-glow border border-blue-400/30",
     secondary:
-      "bg-zinc-800/80 hover:bg-zinc-750 text-zinc-100 border border-zinc-700/60 hover:border-zinc-600",
+      "bg-slate-800/90 hover:bg-slate-800 text-slate-100 border border-slate-700/80 hover:border-slate-600",
     outline:
-      "bg-transparent hover:bg-zinc-800/50 text-zinc-300 hover:text-white border border-zinc-700/80 hover:border-amber-500/40",
+      "bg-slate-900/60 hover:bg-slate-800/70 text-slate-300 hover:text-white border border-slate-800 hover:border-blue-500/40",
     ghost:
-      "bg-transparent hover:bg-zinc-800/50 text-zinc-400 hover:text-zinc-200 border border-transparent",
-    cyan: "bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 shadow-cyan-glow",
+      "bg-transparent hover:bg-slate-800/50 text-slate-400 hover:text-slate-200 border border-transparent",
+    cyan:
+      "bg-blue-500/10 hover:bg-blue-500/20 text-blue-300 border border-blue-500/30 shadow-tech-glow",
+    emerald:
+      "bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 shadow-emerald-glow",
     danger:
       "bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/30",
   };

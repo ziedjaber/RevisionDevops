@@ -45,39 +45,39 @@ export const GitGraphCanvas: React.FC<GitGraphCanvasProps> = ({
 
   return (
     <div className="flex flex-col space-y-3">
-      <div className="relative rounded-2xl border border-[#1e2330] bg-[#0d1117]/95 backdrop-blur-xl overflow-x-auto overflow-y-hidden shadow-subtle-card">
-        {/* Subtle technical grid */}
+      <div className="relative rounded-2xl border border-slate-800 bg-slate-900/90 backdrop-blur-xl overflow-x-auto overflow-y-hidden shadow-saas-card">
+        {/* Subtle grid */}
         <div
-          className="absolute inset-0 opacity-[0.07] pointer-events-none"
+          className="absolute inset-0 opacity-[0.08] pointer-events-none"
           style={{
-            backgroundImage: "radial-gradient(#f59e0b 1px, transparent 1px)",
+            backgroundImage: "radial-gradient(#3b82f6 1px, transparent 1px)",
             backgroundSize: "24px 24px",
           }}
         />
 
         {/* Legend bar */}
-        <div className="flex flex-wrap items-center justify-between gap-2 px-4 py-2 border-b border-[#1e2330] bg-[#12151d]/90 text-[11px] font-mono">
+        <div className="flex flex-wrap items-center justify-between gap-2 px-4 py-2.5 border-b border-slate-800 bg-slate-950/60 text-[11px] font-mono">
           <div className="flex items-center gap-4">
             <span className="flex items-center gap-1.5 text-emerald-400">
               <span className="w-2.5 h-2.5 rounded-full bg-[#10b981] inline-block" />
               Commit SHA-1
             </span>
-            <span className="flex items-center gap-1.5 text-cyan-400">
-              <span className="w-2.5 h-2.5 rounded-full bg-[#06b6d4] inline-block" />
+            <span className="flex items-center gap-1.5 text-amber-400">
+              <span className="w-2.5 h-2.5 rounded-full bg-[#f59e0b] inline-block" />
               Pointeur HEAD
             </span>
-            <span className="flex items-center gap-1.5 text-purple-400">
-              <span className="w-2.5 h-2.5 rounded-full bg-[#8b5cf6] inline-block" />
-              Merge (2 parents)
+            <span className="flex items-center gap-1.5 text-indigo-400">
+              <span className="w-2.5 h-2.5 rounded-full bg-[#6366f1] inline-block" />
+              Branche / Merge
             </span>
             {state.head.type === "detached" && (
-              <span className="flex items-center gap-1.5 text-red-400 font-bold animate-pulse">
-                <span className="w-2.5 h-2.5 rounded-full bg-[#ef4444] inline-block" />
-                ALERTE : HEAD DÉTACHÉE
+              <span className="flex items-center gap-1.5 text-[#f43f5e] font-bold animate-pulse">
+                <span className="w-2.5 h-2.5 rounded-full bg-[#f43f5e] inline-block" />
+                WARNING : HEAD DÉTACHÉE
               </span>
             )}
           </div>
-          <span className="text-zinc-500">Cliquez sur un nœud pour inspecter son snapshot</span>
+          <span className="text-slate-400">Cliquez sur un commit pour inspecter son snapshot</span>
         </div>
 
         <svg width={width} height={height} className="relative z-10 select-none">
@@ -107,10 +107,10 @@ export const GitGraphCanvas: React.FC<GitGraphCanvasProps> = ({
                   key={`${parentHash}-${child.hash}`}
                   d={pathData}
                   fill="none"
-                  stroke={child.isMerge ? "#8b5cf6" : "#10b981"}
+                  stroke={child.isMerge ? "#6366f1" : "#10b981"}
                   strokeWidth="2.5"
                   strokeDasharray={child.isMerge ? "5 3" : undefined}
-                  className="transition-all duration-500 opacity-75"
+                  className="transition-all duration-500 opacity-80"
                 />
               );
             });
@@ -146,13 +146,13 @@ export const GitGraphCanvas: React.FC<GitGraphCanvasProps> = ({
                     fill="none"
                     stroke={
                       state.head.type === "detached" && isHeadTarget
-                        ? "#ef4444"
-                        : isSelected
+                        ? "#f43f5e"
+                        : isHeadTarget
                         ? "#f59e0b"
-                        : "#06b6d4"
+                        : "#3b82f6"
                     }
                     strokeWidth="2.5"
-                    strokeOpacity="0.85"
+                    strokeOpacity="0.9"
                     filter="url(#glowNode)"
                   />
                 )}
@@ -163,18 +163,18 @@ export const GitGraphCanvas: React.FC<GitGraphCanvasProps> = ({
                   r={c.isMerge ? "14" : "12"}
                   fill={
                     state.head.type === "detached" && isHeadTarget
-                      ? "#450a0a"
+                      ? "#4c0519"
                       : c.isMerge
-                      ? "#2e1065"
+                      ? "#1e1b4b"
                       : "#064e3b"
                   }
                   stroke={
                     state.head.type === "detached" && isHeadTarget
-                      ? "#ef4444"
-                      : c.isMerge
-                      ? "#8b5cf6"
+                      ? "#f43f5e"
                       : isHeadTarget
-                      ? "#06b6d4"
+                      ? "#f59e0b"
+                      : c.isMerge
+                      ? "#6366f1"
                       : "#10b981"
                   }
                   strokeWidth="2.5"
@@ -186,9 +186,11 @@ export const GitGraphCanvas: React.FC<GitGraphCanvasProps> = ({
                   r="4"
                   fill={
                     state.head.type === "detached" && isHeadTarget
-                      ? "#f87171"
+                      ? "#fb7185"
+                      : isHeadTarget
+                      ? "#fbbf24"
                       : c.isMerge
-                      ? "#c4b5fd"
+                      ? "#818cf8"
                       : "#34d399"
                   }
                 />
@@ -198,7 +200,7 @@ export const GitGraphCanvas: React.FC<GitGraphCanvasProps> = ({
                   x={pos.x}
                   y={pos.y + 27}
                   textAnchor="middle"
-                  fill="#e2e8f0"
+                  fill="#f1f5f9"
                   fontSize="11"
                   fontFamily="monospace"
                   fontWeight="700"
@@ -211,7 +213,7 @@ export const GitGraphCanvas: React.FC<GitGraphCanvasProps> = ({
                   x={pos.x}
                   y={pos.y + 41}
                   textAnchor="middle"
-                  fill="#64748b"
+                  fill="#94a3b8"
                   fontSize="9.5"
                   fontFamily="sans-serif"
                 >
@@ -237,15 +239,15 @@ export const GitGraphCanvas: React.FC<GitGraphCanvasProps> = ({
                           width={boxW}
                           height="18"
                           rx="6"
-                          fill="#12151d"
-                          stroke={isHeadBranch ? "#06b6d4" : "#f59e0b"}
+                          fill="#0f172a"
+                          stroke={isHeadBranch ? "#f59e0b" : "#3b82f6"}
                           strokeWidth="1.5"
                         />
                         <text
                           x="0"
                           y="-4"
                           textAnchor="middle"
-                          fill={isHeadBranch ? "#22d3ee" : "#fbbf24"}
+                          fill={isHeadBranch ? "#fbbf24" : "#93c5fd"}
                           fontSize="9.5"
                           fontWeight="bold"
                           fontFamily="monospace"
@@ -265,15 +267,15 @@ export const GitGraphCanvas: React.FC<GitGraphCanvasProps> = ({
                         width="116"
                         height="18"
                         rx="6"
-                        fill="#450a0a"
-                        stroke="#ef4444"
+                        fill="#4c0519"
+                        stroke="#f43f5e"
                         strokeWidth="1.5"
                       />
                       <text
                         x="0"
                         y="-4"
                         textAnchor="middle"
-                        fill="#fca5a5"
+                        fill="#fda4af"
                         fontSize="9.5"
                         fontWeight="bold"
                         fontFamily="monospace"
@@ -297,15 +299,15 @@ export const GitGraphCanvas: React.FC<GitGraphCanvasProps> = ({
                         width="68"
                         height="16"
                         rx="5"
-                        fill="#1e1b4b"
-                        stroke="#8b5cf6"
+                        fill="#064e3b"
+                        stroke="#10b981"
                         strokeWidth="1.2"
                       />
                       <text
                         x="0"
                         y="-4"
                         textAnchor="middle"
-                        fill="#ddd6fe"
+                        fill="#a7f3d0"
                         fontSize="9"
                         fontWeight="bold"
                         fontFamily="monospace"
@@ -326,19 +328,19 @@ export const GitGraphCanvas: React.FC<GitGraphCanvasProps> = ({
         <motion.div
           initial={{ opacity: 0, y: -6 }}
           animate={{ opacity: 1, y: 0 }}
-          className="p-3.5 rounded-xl border border-[#1e2330] bg-[#12151d]/95 flex flex-wrap items-center justify-between gap-4 text-xs"
+          className="p-3.5 rounded-xl border border-slate-800 bg-slate-900/90 flex flex-wrap items-center justify-between gap-4 text-xs"
         >
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <span className="font-mono px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 font-bold">
                 SHA-1: {selectedCommit.hash}
               </span>
-              <span className="text-zinc-100 font-semibold">{selectedCommit.message}</span>
+              <span className="text-slate-100 font-semibold">{selectedCommit.message}</span>
             </div>
-            <div className="text-zinc-400 flex items-center gap-3 text-[11px] font-mono">
+            <div className="text-slate-400 flex items-center gap-3 text-[11px] font-mono">
               <span>
                 Parents :{" "}
-                <strong className="text-cyan-400">
+                <strong className="text-blue-400">
                   {selectedCommit.parents.length > 0
                     ? selectedCommit.parents.join(" + ")
                     : "root-commit (aucun parent)"}
@@ -350,7 +352,7 @@ export const GitGraphCanvas: React.FC<GitGraphCanvasProps> = ({
           </div>
           <button
             onClick={() => setSelectedCommitHash(null)}
-            className="px-2.5 py-1 text-zinc-400 hover:text-zinc-200 bg-[#090a0f] border border-[#1e2330] rounded-lg font-mono text-[11px]"
+            className="px-2.5 py-1 text-slate-400 hover:text-slate-200 bg-slate-950 border border-slate-800 rounded-lg font-mono text-[11px]"
           >
             Fermer
           </button>

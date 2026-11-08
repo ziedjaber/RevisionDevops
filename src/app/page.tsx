@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { TopCommandBar } from "@/components/layout/TopCommandBar";
+import { AnimatedEngineeringBg } from "@/components/layout/AnimatedEngineeringBg";
 import { ProductionArena } from "@/components/arena/ProductionArena";
 import { CommandDrillMode } from "@/components/drills/CommandDrillMode";
 import { TimedQuizArena } from "@/components/quiz/TimedQuizArena";
@@ -210,7 +211,10 @@ export default function DrillChallengePlatform() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#090a0f] text-zinc-100">
+    <div className="relative min-h-screen flex flex-col bg-[#0b0f17] text-slate-100">
+      {/* Subtle Animated SVG Engineering Grid & Particles */}
+      <AnimatedEngineeringBg />
+
       {/* Top Gamification & Mode Switcher Bar */}
       <TopCommandBar
         activeMode={activeMode}
@@ -225,22 +229,22 @@ export default function DrillChallengePlatform() {
             initial={{ opacity: 0, y: -20, x: 20 }}
             animate={{ opacity: 1, y: 0, x: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="fixed bottom-6 right-6 z-50 p-4 rounded-2xl border-2 border-amber-400/70 bg-[#12151d]/95 backdrop-blur-xl shadow-gold-glow flex items-center gap-3.5"
+            className="fixed bottom-6 right-6 z-50 p-4 rounded-2xl border border-indigo-500/50 bg-slate-900/95 backdrop-blur-xl shadow-blue-glow flex items-center gap-3.5"
           >
-            <div className="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-400/50 flex items-center justify-center text-amber-400">
+            <div className="w-10 h-10 rounded-xl bg-indigo-500/15 border border-indigo-500/40 flex items-center justify-center text-indigo-400">
               <Award className="w-5 h-5" />
             </div>
             <div>
-              <span className="text-[10px] font-mono uppercase tracking-wider text-amber-400 font-bold block">
+              <span className="text-[10px] font-mono uppercase tracking-wider text-indigo-400 font-bold block">
                 Nouveau Badge Débloqué !
               </span>
-              <span className="text-sm font-extrabold text-zinc-100">
+              <span className="text-sm font-extrabold text-slate-100">
                 {recentBadgeName}
               </span>
             </div>
             <button
               onClick={() => setRecentBadgeName(null)}
-              className="text-zinc-500 hover:text-zinc-200 ml-2"
+              className="text-slate-500 hover:text-slate-200 ml-2"
             >
               <X className="w-4 h-4" />
             </button>
@@ -249,7 +253,7 @@ export default function DrillChallengePlatform() {
       </AnimatePresence>
 
       {/* Main Content Area */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <main className="relative z-10 flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {activeMode === "arena" && (
           <ProductionArena
             solvedArenaIds={stats.solvedArenaIds}
