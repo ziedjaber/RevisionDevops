@@ -10,18 +10,36 @@ import {
   PillIndicator,
   PillStatus,
 } from "@/components/ui/kibo-ui";
+import { DotPattern } from "@/components/ui/magic-ui";
+import {
+  CommitNetworkParticles,
+  AuroraTerminalBg,
+  DecryptedText,
+  ShinyText,
+  SpotlightDivider,
+} from "@/components/ui/react-bits";
 import { ArrowUpRight } from "lucide-react";
 
+/**
+ * Global background combining:
+ * - Magic UI DotPattern (subtle radial masked grid)
+ * - React Bits Aurora backdrop
+ * - tsParticles CommitNetworkParticles (interactive commit-node graph reacting to cursor)
+ */
 export function AnimatedEngineeringBg() {
   return (
-    <div
-      className="pointer-events-none fixed inset-0 z-0 opacity-[0.18]"
-      style={{
-        backgroundImage:
-          "radial-gradient(hsl(var(--border)) 1px, transparent 1px)",
-        backgroundSize: "24px 24px",
-      }}
-    />
+    <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
+      <AuroraTerminalBg intensity="subtle" />
+      <DotPattern
+        width={24}
+        height={24}
+        cx={1}
+        cy={1}
+        cr={1}
+        className="[mask-image:radial-gradient(900px_circle_at_center,white,transparent)] opacity-45"
+      />
+      <CommitNetworkParticles className="opacity-75" />
+    </div>
   );
 }
 
@@ -36,38 +54,43 @@ const MODE_META: Record<
 > = {
   arena: {
     tag: "Mode 1 · Arena",
-    announcement: "Powered by Gitgraph.js (@gitgraph/core) & Kibo UI Snippets",
+    announcement:
+      "Gitgraph.js + Magic UI BorderBeam + Inspira UI 3D Tilt Cards",
     title: "Production Incident Arena",
     subtitle:
-      "Resolve real-world Git & DevOps incidents step by step on the live Gitgraph.js commit DAG.",
+      "Résolvez des incidents Git & DevOps réels pas à pas sur le graphe de commits interactif Gitgraph.js.",
   },
   drills: {
     tag: "Mode 2 · CLI Drills",
-    announcement: "20 interactive Git & DevOps terminal drills",
+    announcement:
+      "20 drills Git & CI/CD · Inspira UI Typewriter + GlowButton + AutoAnimate",
     title: "Interactive CLI Command Drills",
     subtitle:
-      "Type the exact command for each scenario to build your streak multiplier and unlock badges.",
+      "Tapez et testez la commande exacte dans le terminal immersif React Bits Aurora pour augmenter votre multiplicateur de série.",
   },
   quiz: {
     tag: "Mode 3 · Speed Quiz",
-    announcement: "24 timed questions across Junior, Mid and DevOps Lead tiers",
+    announcement:
+      "24 questions chronométrées (Junior, Mid, DevOps Lead) + Canvas Confetti",
     title: "Timed DevOps & Git Assessment",
     subtitle:
-      "Benchmark your mastery under time pressure with automatic Post-Mortem error tracking.",
+      "Évaluez vos réflexes sous pression temporelle avec enregistrement automatique dans le coffre Post-Mortem.",
   },
   sandbox: {
     tag: "Mode 4 · Gitgraph.js",
-    announcement: "Switch between Metro (Bezier) & BlackArrow templates live",
+    announcement:
+      "Graphe de commits DAG + AutoAnimate 3-Zones Working Dir ↔ Index ↔ .git",
     title: "Gitgraph.js Interactive Commit Simulator",
     subtitle:
-      "Experiment freely with branches, fast-forward vs 3-way merges, rebase, tags and the Kibo UI 3-zone file tree.",
+      "Expérimentez librement avec les branches, fast-forward vs 3-way merges, rebase, tags et les 3 zones locales animées par AutoAnimate.",
   },
   profile: {
-    tag: "Diagnostics",
-    announcement: "Review every recorded CLI mistake alongside your 12 skill badges",
+    tag: "Diagnostics & Gamification",
+    announcement:
+      "12 Badges de compétences + Coffre d'erreurs Post-Mortem animé",
     title: "Skill Badges & Post-Mortem Error Vault",
     subtitle:
-      "Track your XP progression, unlocked milestones and side-by-side command diagnostics.",
+      "Suivez votre progression XP, vos badges débloqués et l'analyse comparative de vos erreurs CLI.",
   },
 };
 
@@ -78,13 +101,14 @@ export function WorkspaceOverviewHeader({
   const meta = MODE_META[activeMode];
 
   return (
-    <div className="mb-6 flex flex-col gap-3 border-b border-border pb-5">
+    <div className="mb-6 flex flex-col gap-3 pb-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        {/* Kibo UI Announcement component */}
         <Announcement themed>
           <AnnouncementTag>{meta.tag}</AnnouncementTag>
           <AnnouncementTitle>
-            <span>{meta.announcement}</span>
+            <ShinyText className="font-mono text-[11px]">
+              {meta.announcement}
+            </ShinyText>
             <ArrowUpRight className="h-3 w-3 text-muted-foreground" />
           </AnnouncementTitle>
         </Announcement>
@@ -93,7 +117,7 @@ export function WorkspaceOverviewHeader({
           <Pill variant="outline" className="text-xs py-0.5">
             <PillStatus>
               <PillIndicator variant="success" pulse />
-              <span>Resolved</span>
+              <span>Progression</span>
             </PillStatus>
             <span className="font-mono">
               {stats.solvedArenaIds.length}/6 incidents ·{" "}
@@ -105,10 +129,12 @@ export function WorkspaceOverviewHeader({
 
       <div>
         <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
-          {meta.title}
+          <DecryptedText text={meta.title} speed={18} />
         </h1>
         <p className="text-sm text-muted-foreground mt-1">{meta.subtitle}</p>
       </div>
+
+      <SpotlightDivider className="mt-1" />
     </div>
   );
 }

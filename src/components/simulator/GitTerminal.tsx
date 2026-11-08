@@ -1,11 +1,15 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
+import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { Terminal as TerminalIcon, Send, RotateCcw } from "lucide-react";
 import { CommandOutput } from "@/types/git";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Status, StatusIndicator, StatusLabel } from "@/components/ui/kibo-ui";
+import { BorderBeam } from "@/components/ui/magic-ui";
+import { AuroraTerminalBg } from "@/components/ui/react-bits";
+import { GlowButton, TypewriterTerminalText } from "@/components/ui/inspira-ui";
 
 interface GitTerminalProps {
   history: CommandOutput[];
@@ -22,6 +26,7 @@ export const GitTerminal: React.FC<GitTerminalProps> = ({
   const [historyIndex, setHistoryIndex] = useState<number>(-1);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const [logListRef] = useAutoAnimate<HTMLDivElement>();
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -75,12 +80,15 @@ export const GitTerminal: React.FC<GitTerminalProps> = ({
   ];
 
   return (
-    <Card className="overflow-hidden flex flex-col font-mono text-xs border-border bg-card/95">
-      <CardHeader className="flex flex-row items-center justify-between px-4 py-2.5 bg-muted/40 border-b border-border space-y-0">
+    <Card className="relative overflow-hidden flex flex-col font-mono text-xs border-border bg-card/95">
+      <BorderBeam size={200} duration={14} colorFrom="#6366f1" colorTo="#10b981" />
+      <AuroraTerminalBg intensity="subtle" />
+
+      <CardHeader className="relative z-10 flex flex-row items-center justify-between px-4 py-2.5 bg-muted/40 border-b border-border space-y-0">
         <div className="flex items-center gap-2.5">
           <TerminalIcon className="w-4 h-4 text-sky-400" />
           <CardTitle className="text-xs font-semibold font-sans">
-            Git Interactive Shell
+            Console Interactive Git · JetBrains Mono
           </CardTitle>
           <Status status="online" className="py-0 px-2">
             <StatusIndicator />
@@ -98,45 +106,58 @@ export const GitTerminal: React.FC<GitTerminalProps> = ({
         </Button>
       </CardHeader>
 
-      <CardContent className="p-0 flex flex-col">
+      <CardContent className="relative z-10 p-0 flex flex-col">
         <div
           ref={scrollRef}
-          className="p-4 flex-1 min-h-[200px] max-h-[280px] overflow-y-auto space-y-3 bg-background/60 select-text"
+          className="p-4 flex-1 min-h-[200px] max-h-[280px] overflow-y-auto bg-background/50 select-text"
         >
-          {history.map((item, idx) => (
-            <div key={idx} className="space-y-1">
-              <div className="flex items-center gap-2 text-muted-foreground">
-                <span className="text-emerald-400 font-bold">
-                  devops@lab:~/repo$
-                </span>
-                <span className="text-foreground font-semibold">
-                  {item.command}
-                </span>
-                <span className="text-[10px] text-muted-foreground ml-auto">
-                  {item.timestamp}
-                </span>
-              </div>
-              <pre
-                className={`p-2.5 rounded-lg text-[11px] whitespace-pre-wrap leading-relaxed border ${
-                  item.type === "error"
-                    ? "bg-rose-500/10 text-rose-300 border-rose-500/30"
-                    : item.type === "warning"
-                    ? "bg-amber-500/10 text-amber-300 border-amber-500/30"
-                    : item.type === "success"
-                    ? "bg-emerald-500/10 text-emerald-300 border-emerald-500/30"
-                    : "bg-secondary/50 text-foreground border-border"
-                }`}
-              >
-                {item.output}
-              </pre>
-            </div>
-          ))}
+          <div ref={logListRef} className="space-y-3">
+            {history.map((item, idx) => {
+              const isLatest = idx === history.length - 1;
+              return (
+                <div key={`${item.command}-${idx}`} className="space-y-1">
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <span className="text-emerald-400 font-bold">
+                      devops@lab:~/repo$
+                    </span>
+                    <span className="text-foreground font-semibold">
+                      {item.command}
+                    </span>
+                    <span className="text-[10px] text-muted-foreground ml-auto">
+                      {item.timestamp}
+                    </span>
+                  </div>
+                  <pre
+                    className={`p-2.5 rounded-lg text-[11px] whitespace-pre-wrap leading-relaxed border ${
+                      item.type === "error"
+                        ? "bg-rose-500/10 text-rose-300 border-rose-500/30"
+                        : item.type === "warning"
+                        ? "bg-amber-500/10 text-amber-300 border-amber-500/30"
+                        : item.type === "success"
+                        ? "bg-emerald-500/10 text-emerald-300 border-emerald-500/30"
+                        : "bg-secondary/50 text-foreground border-border"
+                    }`}
+                  >
+                    {isLatest ? (
+                      <TypewriterTerminalText
+                        text={item.output}
+                        speed={10}
+                        showCursor
+                      />
+                    ) : (
+                      item.output
+                    )}
+                  </pre>
+                </div>
+              );
+            })}
+          </div>
         </div>
 
         {/* Quick Command Pills */}
         <div className="px-3 py-2 bg-muted/20 border-t border-border flex items-center gap-1.5 overflow-x-auto">
           <span className="text-[10px] text-muted-foreground shrink-0 mr-1 font-sans">
-            Quick run:
+            Exécution rapide :
           </span>
           {quickCommands.map((q) => (
             <button
@@ -153,10 +174,10 @@ export const GitTerminal: React.FC<GitTerminalProps> = ({
           ))}
         </div>
 
-        {/* Input Form */}
+        {/* Input Form with Inspira UI GlowButton */}
         <form
           onSubmit={handleSubmit}
-          className="flex items-center gap-2 px-3.5 py-2.5 bg-background border-t border-border"
+          className="flex items-center gap-2 px-3.5 py-2.5 bg-background/90 border-t border-border"
         >
           <span className="text-emerald-400 font-bold shrink-0">git&gt;</span>
           <input
@@ -165,12 +186,13 @@ export const GitTerminal: React.FC<GitTerminalProps> = ({
             value={inputVal}
             onChange={(e) => setInputVal(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Enter a git command (e.g. git commit -m 'feat: ...', git merge feature, git switch -c dev)..."
+            placeholder="Saisissez une commande Git (ex: git commit -m 'feat: ...', git merge, git switch -c)..."
             className="flex-1 bg-transparent text-foreground placeholder-muted-foreground focus:outline-none text-xs"
           />
-          <Button type="submit" size="sm" className="h-7 px-2.5">
-            <Send className="w-3.5 h-3.5" />
-          </Button>
+          <GlowButton type="submit" variant="indigo" size="sm">
+            <span>Tester la commande</span>
+            <Send className="w-3 h-3" />
+          </GlowButton>
         </form>
       </CardContent>
     </Card>

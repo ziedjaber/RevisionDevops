@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { badgesData } from "@/data/badgesData";
 import { PlayerStats } from "@/types/game";
 import { getRankTitle } from "@/components/layout/TopCommandBar";
@@ -30,7 +31,6 @@ import {
   CardContent,
   CardFooter,
 } from "@/components/ui/Card";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/Tabs";
 import { Progress } from "@/components/ui/Progress";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
@@ -45,6 +45,9 @@ import {
   SnippetTabsContent,
   SnippetCopyButton,
 } from "@/components/ui/kibo-ui";
+import { BorderBeam } from "@/components/ui/magic-ui";
+import { Card3DTilt } from "@/components/ui/inspira-ui";
+import { CultSpringTabs, CultTabItem } from "@/components/ui/cult-ui";
 import { cn } from "@/lib/utils";
 
 interface SkillBadgesAndErrorsProps {
@@ -68,6 +71,13 @@ const iconMap: Record<string, React.ElementType> = {
   Crown,
 };
 
+const MISTAKE_TABS: CultTabItem<"All" | "arena" | "drills" | "quiz">[] = [
+  { id: "All", label: "Toutes" },
+  { id: "arena", label: "Arena" },
+  { id: "drills", label: "CLI Drills" },
+  { id: "quiz", label: "Quiz" },
+];
+
 export const SkillBadgesAndErrors: React.FC<SkillBadgesAndErrorsProps> = ({
   stats,
   onClearMistakes,
@@ -76,6 +86,7 @@ export const SkillBadgesAndErrors: React.FC<SkillBadgesAndErrorsProps> = ({
   const [mistakeFilter, setMistakeFilter] = useState<
     "All" | "arena" | "drills" | "quiz"
   >("All");
+  const [mistakesListRef] = useAutoAnimate<HTMLDivElement>();
 
   const rank = getRankTitle(stats.xp);
   const rankProgress = Math.min(
@@ -89,16 +100,22 @@ export const SkillBadgesAndErrors: React.FC<SkillBadgesAndErrorsProps> = ({
 
   return (
     <div className="space-y-8">
-      {/* Player Progression Overview Card (shadcn/ui Card + Progress) */}
-      <Card>
+      {/* Player Progression Overview Card (shadcn/ui Card + Magic UI BorderBeam + Progress) */}
+      <Card className="relative overflow-hidden">
+        <BorderBeam
+          size={200}
+          duration={16}
+          colorFrom="#f59e0b"
+          colorTo="#10b981"
+        />
         <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-4 space-y-0">
           <div className="space-y-1">
             <CardDescription className="font-mono text-xs">
-              Rank &amp; XP Progression
+              Progression Grade &amp; XP
             </CardDescription>
             <CardTitle className="text-2xl font-bold">{rank.title}</CardTitle>
             <p className="text-xs text-muted-foreground font-mono">
-              Next milestone: {stats.xp} / {rank.nextXp} XP
+              Prochain palier : {stats.xp} / {rank.nextXp} XP
             </p>
           </div>
 
@@ -134,18 +151,18 @@ export const SkillBadgesAndErrors: React.FC<SkillBadgesAndErrorsProps> = ({
         </CardContent>
       </Card>
 
-      {/* Section 1: Skill Badges Grid */}
+      {/* Section 1: Skill Badges Grid with Inspira UI 3D Tilt */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
               <Award className="w-5 h-5 text-sky-400" />
-              Unlocked Skill Badges ({stats.unlockedBadgeIds.length}/
+              Badges de Compétences ({stats.unlockedBadgeIds.length}/
               {badgesData.length})
             </h2>
             <p className="text-xs text-muted-foreground">
-              Badges unlock automatically as you resolve incidents, complete CLI
-              drills and finish error-free quiz runs.
+              Les badges se débloquent automatiquement lors de vos victoires en
+              Arena, Command Drills et Quiz sans faute.
             </p>
           </div>
         </div>
@@ -156,11 +173,12 @@ export const SkillBadgesAndErrors: React.FC<SkillBadgesAndErrorsProps> = ({
             const Icon = iconMap[badge.iconName] || Award;
 
             return (
-              <Card
+              <Card3DTilt
                 key={badge.id}
+                active={isUnlocked}
                 className={cn(
                   "flex flex-col justify-between transition-all",
-                  isUnlocked ? "border-primary/30" : "opacity-60"
+                  !isUnlocked && "opacity-60"
                 )}
               >
                 <CardHeader className="space-y-2 pb-3">
@@ -194,17 +212,17 @@ export const SkillBadgesAndErrors: React.FC<SkillBadgesAndErrorsProps> = ({
                   <span>{badge.conditionText}</span>
                   {isUnlocked && (
                     <span className="text-emerald-400 font-semibold">
-                      ✓ Unlocked
+                      ✓ Débloqué
                     </span>
                   )}
                 </CardFooter>
-              </Card>
+              </Card3DTilt>
             );
           })}
         </div>
       </div>
 
-      {/* Section 2: Detailed Error Post-Mortem Log with Kibo UI Snippet */}
+      {/* Section 2: Detailed Error Post-Mortem Log with AutoAnimate & Kibo UI Snippet */}
       <div className="space-y-4 pt-4 border-t border-border">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
@@ -213,25 +231,18 @@ export const SkillBadgesAndErrors: React.FC<SkillBadgesAndErrorsProps> = ({
               Post-Mortem Error Vault ({stats.mistakes.length})
             </h2>
             <p className="text-xs text-muted-foreground">
-              Every failed command or missed question is logged here with
-              side-by-side Kibo UI Snippets.
+              Chaque erreur de commande ou réponse manquée est archivée ici avec
+              comparaison côte à côte.
             </p>
           </div>
 
           <div className="flex items-center gap-2">
-            <Tabs
+            <CultSpringTabs
+              items={MISTAKE_TABS}
               value={mistakeFilter}
-              onValueChange={(v) =>
-                setMistakeFilter(v as "All" | "arena" | "drills" | "quiz")
-              }
-            >
-              <TabsList>
-                <TabsTrigger value="All">All</TabsTrigger>
-                <TabsTrigger value="arena">Arena</TabsTrigger>
-                <TabsTrigger value="drills">CLI Drills</TabsTrigger>
-                <TabsTrigger value="quiz">Quiz</TabsTrigger>
-              </TabsList>
-            </Tabs>
+              onChange={setMistakeFilter}
+              layoutId="postmortem-filter-spring-tabs"
+            />
 
             {stats.mistakes.length > 0 && (
               <Button
@@ -240,7 +251,7 @@ export const SkillBadgesAndErrors: React.FC<SkillBadgesAndErrorsProps> = ({
                 size="sm"
                 icon={<Trash2 className="w-3.5 h-3.5" />}
               >
-                Clear Log
+                Purger
               </Button>
             )}
           </div>
@@ -250,15 +261,15 @@ export const SkillBadgesAndErrors: React.FC<SkillBadgesAndErrorsProps> = ({
           <Card className="p-10 text-center space-y-2">
             <CheckCircle2 className="w-8 h-8 text-emerald-400 mx-auto" />
             <div className="text-sm font-semibold text-foreground">
-              No errors recorded in this category
+              Aucune erreur enregistrée dans cette catégorie
             </div>
             <p className="text-xs text-muted-foreground">
-              Practice in the Incident Arena, Command Drills or Timed Quiz to
-              test your reflexes.
+              Entraînez-vous dans l&apos;Incident Arena, les Command Drills ou le
+              Quiz Chronométré pour tester vos réflexes.
             </p>
           </Card>
         ) : (
-          <div className="space-y-3">
+          <div ref={mistakesListRef} className="space-y-3">
             {filteredMistakes.map((mistake) => (
               <Card key={mistake.id} className="p-5 space-y-3 text-xs">
                 <div className="flex flex-wrap items-center justify-between gap-2">
@@ -279,7 +290,7 @@ export const SkillBadgesAndErrors: React.FC<SkillBadgesAndErrorsProps> = ({
                       size="sm"
                       className="h-7 text-xs font-mono text-emerald-400"
                     >
-                      ✓ Mark resolved
+                      ✓ Marquer maîtrisé
                     </Button>
                   </div>
                 </div>
@@ -288,15 +299,14 @@ export const SkillBadgesAndErrors: React.FC<SkillBadgesAndErrorsProps> = ({
                   {mistake.prompt}
                 </div>
 
-                {/* Kibo UI Snippet comparing Attempted vs Expected Solution */}
                 <Snippet defaultValue="expected">
                   <SnippetHeader>
                     <SnippetTabsList className="h-7">
                       <SnippetTabsTrigger value="expected">
-                        ✓ Expected Solution
+                        ✓ Solution attendue
                       </SnippetTabsTrigger>
                       <SnippetTabsTrigger value="attempt">
-                        ✗ Your Attempt
+                        ✗ Votre saisie
                       </SnippetTabsTrigger>
                     </SnippetTabsList>
                     <SnippetCopyButton value={mistake.correctAnswer} />

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { timedQuizData } from "@/data/timedQuizData";
 import {
   TimedQuizQuestion,
@@ -22,7 +23,6 @@ import {
   CardHeader,
   CardTitle,
   CardDescription,
-  CardContent,
   CardFooter,
 } from "@/components/ui/Card";
 import { Progress } from "@/components/ui/Progress";
@@ -36,6 +36,8 @@ import {
   StatusIndicator,
   StatusLabel,
 } from "@/components/ui/kibo-ui";
+import { BorderBeam } from "@/components/ui/magic-ui";
+import { Card3DTilt, GlowButton } from "@/components/ui/inspira-ui";
 import { cn } from "@/lib/utils";
 import confetti from "canvas-confetti";
 
@@ -70,6 +72,7 @@ export const TimedQuizArena: React.FC<TimedQuizArenaProps> = ({
   const [sessionCorrect, setSessionCorrect] = useState<number>(0);
   const [sessionMistakes, setSessionMistakes] = useState<SessionMistake[]>([]);
   const [isFinished, setIsFinished] = useState<boolean>(false);
+  const [recapListRef] = useAutoAnimate<HTMLDivElement>();
 
   const activeQuestion = questionPool[currentIdx];
 
@@ -122,7 +125,7 @@ export const TimedQuizArena: React.FC<TimedQuizArenaProps> = ({
       difficulty: activeQuestion.difficulty,
       category: activeQuestion.category,
       prompt: activeQuestion.question,
-      userAnswer: "Timeout (Time limit exceeded)",
+      userAnswer: "Timeout (Temps écoulé)",
       correctAnswer: activeQuestion.options[activeQuestion.correctIndex],
       explanation: activeQuestion.explanation,
     });
@@ -148,7 +151,7 @@ export const TimedQuizArena: React.FC<TimedQuizArenaProps> = ({
       onCorrectAnswer(earned);
 
       confetti({
-        particleCount: 25,
+        particleCount: 28,
         spread: 45,
         origin: { y: 0.8 },
       });
@@ -182,8 +185,8 @@ export const TimedQuizArena: React.FC<TimedQuizArenaProps> = ({
       if (sessionMistakes.length === 0 && questionPool.length >= 4) {
         onCompletePerfectQuiz();
         confetti({
-          particleCount: 90,
-          spread: 70,
+          particleCount: 100,
+          spread: 75,
           origin: { y: 0.6 },
         });
       }
@@ -202,33 +205,33 @@ export const TimedQuizArena: React.FC<TimedQuizArenaProps> = ({
       {
         level: "Junior",
         title: "Junior DevOps Tier",
-        desc: "The 3 Git local zones, SHA-1 snapshots, pull vs fetch, CAMS principles, REST Stateless and DVCS vs CVCS.",
+        desc: "Les 3 zones locales Git, snapshots SHA-1, pull vs fetch, principes CAMS, REST Stateless et DVCS vs CVCS.",
         timeLabel: "30s / question",
-        pointsLabel: "100 XP + Speed Bonus",
+        pointsLabel: "100 XP + Bonus Vitesse",
         badge: "emerald",
       },
       {
         level: "Mid",
         title: "Mid Engineer Tier",
-        desc: "Diff --staged, Fast-Forward vs 3-Way Merge, Reset modes, Commit --amend, GitFlow vs Trunk-Based and GitLab CI.",
+        desc: "Diff --staged, Fast-Forward vs 3-Way Merge, modes Reset, Commit --amend, GitFlow vs Trunk-Based et GitLab CI.",
         timeLabel: "35s / question",
-        pointsLabel: "150 XP + Speed Bonus",
+        pointsLabel: "150 XP + Bonus Vitesse",
         badge: "amber",
       },
       {
         level: "DevOps Lead",
         title: "DevOps Lead Tier",
-        desc: "Rebase --onto, Detached HEAD traps, Linux kernel workflows, Cherry-Pick internals, Rebase Golden Rule and GitLab Runners.",
+        desc: "Rebase --onto, pièges Detached HEAD, workflows noyau Linux, Cherry-Pick, Règle d'Or du Rebase et GitLab Runners.",
         timeLabel: "40s / question",
-        pointsLabel: "200 XP + Speed Bonus",
+        pointsLabel: "200 XP + Bonus Vitesse",
         badge: "rose",
       },
       {
         level: "All",
-        title: "Full 24-Question Marathon",
-        desc: "Complete all 24 Junior, Mid and DevOps Lead questions in a single timed benchmark.",
+        title: "Marathon Intégral (24 Questions)",
+        desc: "Enchaînez les 24 questions Junior, Mid et DevOps Lead dans un benchmark complet chronométré.",
         timeLabel: "30-40s / question",
-        pointsLabel: "Maximum Score",
+        pointsLabel: "Score Maximum",
         badge: "blue",
       },
     ];
@@ -236,9 +239,9 @@ export const TimedQuizArena: React.FC<TimedQuizArenaProps> = ({
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {tiers.map((t) => (
-          <Card
+          <Card3DTilt
             key={t.level}
-            className="flex flex-col justify-between hover:border-primary/40 transition-colors"
+            className="flex flex-col justify-between"
           >
             <CardHeader className="space-y-2">
               <div className="flex items-center justify-between">
@@ -258,19 +261,20 @@ export const TimedQuizArena: React.FC<TimedQuizArenaProps> = ({
               <span className="text-xs font-mono text-emerald-400 font-semibold">
                 {t.pointsLabel}
               </span>
-              <Button
+              <GlowButton
+                type="button"
                 onClick={() => {
                   setSelectedTier(t.level);
                   startQuiz(t.level);
                 }}
-                variant="default"
+                variant="indigo"
                 size="sm"
-                icon={<Play className="w-3.5 h-3.5" />}
               >
-                Start Timer
-              </Button>
+                <Play className="w-3.5 h-3.5" />
+                <span>Lancer le chrono</span>
+              </GlowButton>
             </CardFooter>
-          </Card>
+          </Card3DTilt>
         ))}
       </div>
     );
@@ -281,24 +285,30 @@ export const TimedQuizArena: React.FC<TimedQuizArenaProps> = ({
 
     return (
       <div className="max-w-4xl mx-auto space-y-6">
-        <Card className="p-8 text-center space-y-5">
+        <Card className="relative overflow-hidden p-8 text-center space-y-5">
+          <BorderBeam
+            size={200}
+            duration={12}
+            colorFrom="#10b981"
+            colorTo="#6366f1"
+          />
           <div className="w-12 h-12 mx-auto rounded-xl bg-secondary border border-border flex items-center justify-center text-emerald-400">
             <Trophy className="w-6 h-6" />
           </div>
 
           <div>
             <Badge variant={accuracy >= 80 ? "emerald" : "amber"}>
-              Tier: {selectedTier} · Accuracy {accuracy}%
+              Niveau : {selectedTier} · Précision {accuracy}%
             </Badge>
             <h2 className="text-2xl font-bold text-foreground mt-2">
-              Timed Assessment Summary
+              Bilan de l&apos;Évaluation Chronométrée
             </h2>
           </div>
 
           <div className="grid grid-cols-3 gap-4 max-w-lg mx-auto font-mono">
             <div className="p-4 rounded-xl bg-secondary/50 border border-border">
               <span className="text-[10px] text-muted-foreground block">
-                XP Earned
+                XP Gagnés
               </span>
               <span className="text-xl font-bold text-emerald-400">
                 +{sessionScore} XP
@@ -306,7 +316,7 @@ export const TimedQuizArena: React.FC<TimedQuizArenaProps> = ({
             </div>
             <div className="p-4 rounded-xl bg-secondary/50 border border-border">
               <span className="text-[10px] text-muted-foreground block">
-                Correct
+                Réussite
               </span>
               <span className="text-xl font-bold text-sky-400">
                 {sessionCorrect}/{questionPool.length}
@@ -314,7 +324,7 @@ export const TimedQuizArena: React.FC<TimedQuizArenaProps> = ({
             </div>
             <div className="p-4 rounded-xl bg-secondary/50 border border-border">
               <span className="text-[10px] text-muted-foreground block">
-                Mistakes
+                Erreurs
               </span>
               <span className="text-xl font-bold text-rose-400">
                 {sessionMistakes.length}
@@ -324,42 +334,43 @@ export const TimedQuizArena: React.FC<TimedQuizArenaProps> = ({
 
           <div className="flex flex-wrap justify-center gap-3 pt-2">
             {sessionMistakes.length > 0 && (
-              <Button
+              <GlowButton
+                type="button"
                 onClick={() =>
                   startQuiz(
                     selectedTier,
                     sessionMistakes.map((m) => m.question)
                   )
                 }
-                variant="default"
+                variant="indigo"
                 size="sm"
-                icon={<RotateCcw className="w-4 h-4" />}
               >
-                Retry {sessionMistakes.length} missed question(s)
-              </Button>
+                <RotateCcw className="w-4 h-4" />
+                <span>Rejouer les {sessionMistakes.length} erreur(s)</span>
+              </GlowButton>
             )}
             <Button
               onClick={() => startQuiz(selectedTier)}
               variant="secondary"
               size="sm"
             >
-              Restart tier
+              Recommencer ce niveau
             </Button>
             <Button
               onClick={() => setIsPlaying(false)}
               variant="outline"
               size="sm"
             >
-              Change tier
+              Changer de niveau
             </Button>
           </div>
         </Card>
 
         {sessionMistakes.length > 0 && (
-          <div className="space-y-4">
+          <div ref={recapListRef} className="space-y-4">
             <div className="flex items-center gap-2 text-sm font-semibold text-rose-400 font-mono">
               <AlertTriangle className="w-4 h-4" />
-              Detailed Error Recap ({sessionMistakes.length})
+              Récapitulatif détaillé des erreurs ({sessionMistakes.length})
             </div>
 
             {sessionMistakes.map((item, idx) => (
@@ -376,7 +387,7 @@ export const TimedQuizArena: React.FC<TimedQuizArenaProps> = ({
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 font-mono">
                   <div className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/30 text-rose-300">
                     <span className="text-[10px] block text-rose-400 font-semibold mb-1">
-                      ✗ Your answer:
+                      ✗ Votre réponse :
                     </span>
                     {item.chosenIndex === null
                       ? "Timeout"
@@ -384,7 +395,7 @@ export const TimedQuizArena: React.FC<TimedQuizArenaProps> = ({
                   </div>
                   <div className="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-300">
                     <span className="text-[10px] block text-emerald-400 font-semibold mb-1">
-                      ✓ Expected answer:
+                      ✓ Réponse attendue :
                     </span>
                     {item.question.options[item.question.correctIndex]}
                   </div>
@@ -406,7 +417,7 @@ export const TimedQuizArena: React.FC<TimedQuizArenaProps> = ({
 
   return (
     <div className="max-w-3xl mx-auto space-y-4">
-      {/* Top Status Bar with Kibo UI Status & Pill */}
+      {/* Top Status Bar */}
       <Card className="flex flex-wrap items-center justify-between gap-4 p-4">
         <div className="flex items-center gap-3">
           <Button
@@ -414,7 +425,7 @@ export const TimedQuizArena: React.FC<TimedQuizArenaProps> = ({
             variant="outline"
             size="sm"
           >
-            ← Exit
+            ← Quitter
           </Button>
           <Badge
             variant={
@@ -465,8 +476,14 @@ export const TimedQuizArena: React.FC<TimedQuizArenaProps> = ({
       {/* shadcn/ui Progress Component */}
       <Progress value={timerPercent} />
 
-      {/* Question Card */}
-      <Card className="p-6 space-y-5">
+      {/* Question Card with Magic UI BorderBeam */}
+      <Card className="relative overflow-hidden p-6 space-y-5">
+        <BorderBeam
+          size={200}
+          duration={14}
+          colorFrom="#6366f1"
+          colorTo="#38bdf8"
+        />
         <h2 className="text-base sm:text-lg font-semibold text-foreground leading-relaxed">
           {activeQuestion.question}
         </h2>
@@ -533,25 +550,28 @@ export const TimedQuizArena: React.FC<TimedQuizArenaProps> = ({
           >
             <div className="font-semibold">
               {selectedOpt === activeQuestion.correctIndex
-                ? "✓ Correct answer"
+                ? "✓ Bonne réponse !"
                 : selectedOpt === -1
-                ? "Timeout — logged to Post-Mortem"
-                : "✗ Incorrect answer — logged to Post-Mortem"}
+                ? "Temps écoulé — enregistré dans le Post-Mortem"
+                : "✗ Mauvaise réponse — enregistrée dans le Post-Mortem"}
             </div>
             <p className="text-muted-foreground leading-relaxed">
               {activeQuestion.explanation}
             </p>
             <div className="flex justify-end">
-              <Button
+              <GlowButton
+                type="button"
                 onClick={handleNextQuestion}
-                variant="default"
+                variant="indigo"
                 size="sm"
-                icon={<ArrowRight className="w-4 h-4" />}
               >
-                {currentIdx + 1 === questionPool.length
-                  ? "View Summary"
-                  : "Next Question"}
-              </Button>
+                <span>
+                  {currentIdx + 1 === questionPool.length
+                    ? "Voir le bilan"
+                    : "Question suivante"}
+                </span>
+                <ArrowRight className="w-4 h-4" />
+              </GlowButton>
             </div>
           </div>
         )}

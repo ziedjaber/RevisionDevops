@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { arenaScenarios } from "@/data/arenaScenarios";
 import { ArenaScenario, DifficultyLevel, MistakeRecord } from "@/types/game";
 import { GitRepoState, CommandOutput } from "@/types/git";
@@ -23,7 +24,6 @@ import {
   CardDescription,
   CardContent,
 } from "@/components/ui/Card";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/Tabs";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import {
@@ -37,6 +37,9 @@ import {
   SnippetTabsContent,
   SnippetCopyButton,
 } from "@/components/ui/kibo-ui";
+import { BorderBeam } from "@/components/ui/magic-ui";
+import { Card3DTilt, GlowButton } from "@/components/ui/inspira-ui";
+import { CultSpringTabs, CultTabItem } from "@/components/ui/cult-ui";
 import { cn } from "@/lib/utils";
 import confetti from "canvas-confetti";
 
@@ -45,6 +48,13 @@ interface ProductionArenaProps {
   onSolveScenario: (scenario: ArenaScenario) => void;
   onRecordMistake: (mistake: Omit<MistakeRecord, "id" | "timestamp">) => void;
 }
+
+const ARENA_TABS: CultTabItem<"All" | DifficultyLevel>[] = [
+  { id: "All", label: "Tous les incidents" },
+  { id: "Junior", label: "Junior" },
+  { id: "Mid", label: "Mid" },
+  { id: "DevOps Lead", label: "DevOps Lead" },
+];
 
 export const ProductionArena: React.FC<ProductionArenaProps> = ({
   solvedArenaIds,
@@ -55,6 +65,10 @@ export const ProductionArena: React.FC<ProductionArenaProps> = ({
     "All" | DifficultyLevel
   >("All");
   const [selectedId, setSelectedId] = useState<string>(arenaScenarios[0].id);
+
+  // AutoAnimate hooks for zero-config list transitions
+  const [scenarioListRef] = useAutoAnimate<HTMLDivElement>();
+  const [objectivesRef] = useAutoAnimate<HTMLDivElement>();
 
   const activeScenario =
     arenaScenarios.find((s) => s.id === selectedId) || arenaScenarios[0];
@@ -77,8 +91,8 @@ export const ProductionArena: React.FC<ProductionArenaProps> = ({
     setJustSolvedBanner(false);
     setTerminalLogs([
       {
-        command: `# Incident ${activeScenario.incidentCode} initialized`,
-        output: `Goal: ${activeScenario.missionGoal}`,
+        command: `# Incident ${activeScenario.incidentCode} initialisé`,
+        output: `Objectif : ${activeScenario.missionGoal}`,
         type: "info",
         timestamp: "00:00",
       },
@@ -113,8 +127,8 @@ export const ProductionArena: React.FC<ProductionArenaProps> = ({
     if (allMet && !justSolvedBanner) {
       setJustSolvedBanner(true);
       confetti({
-        particleCount: 75,
-        spread: 65,
+        particleCount: 85,
+        spread: 70,
         origin: { y: 0.65 },
       });
       onSolveScenario(activeScenario);
@@ -135,8 +149,8 @@ export const ProductionArena: React.FC<ProductionArenaProps> = ({
     setJustSolvedBanner(false);
     setTerminalLogs([
       {
-        command: "# Repository state reset",
-        output: "Ready for a new attempt.",
+        command: "# État du dépôt réinitialisé",
+        output: "Prêt pour une nouvelle tentative.",
         type: "info",
         timestamp: "Reset",
       },
@@ -152,13 +166,13 @@ export const ProductionArena: React.FC<ProductionArenaProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* Filter Bar with shadcn/ui Tabs */}
+      {/* Filter Bar with Cult UI Spring Tabs */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-2">
           <Pill variant="outline" className="text-xs">
             <PillStatus>
               <PillIndicator variant="warning" pulse />
-              <span>Active Incident</span>
+              <span>Incident Actif</span>
             </PillStatus>
             <span className="font-mono font-semibold">
               {activeScenario.incidentCode}
@@ -169,73 +183,72 @@ export const ProductionArena: React.FC<ProductionArenaProps> = ({
           </span>
         </div>
 
-        <Tabs
+        <CultSpringTabs
+          items={ARENA_TABS}
           value={difficultyFilter}
-          onValueChange={(v) =>
-            setDifficultyFilter(v as "All" | DifficultyLevel)
-          }
-        >
-          <TabsList>
-            <TabsTrigger value="All">All Tiers</TabsTrigger>
-            <TabsTrigger value="Junior">Junior</TabsTrigger>
-            <TabsTrigger value="Mid">Mid</TabsTrigger>
-            <TabsTrigger value="DevOps Lead">DevOps Lead</TabsTrigger>
-          </TabsList>
-        </Tabs>
+          onChange={setDifficultyFilter}
+          layoutId="arena-tier-spring-tabs"
+        />
       </div>
 
       {/* Main Arena Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        {/* Left Column: Scenario List & Mission Card */}
+        {/* Left Column: Inspira UI 3D Tilt Scenario Cards & Mission Briefing */}
         <div className="lg:col-span-4 space-y-4">
-          <div className="space-y-2">
+          <div ref={scenarioListRef} className="space-y-2.5">
             {filteredScenarios.map((scen) => {
               const isSelected = scen.id === activeScenario.id;
               const isSolved = solvedArenaIds.includes(scen.id);
               return (
-                <button
+                <Card3DTilt
                   key={scen.id}
+                  active={isSelected}
                   onClick={() => setSelectedId(scen.id)}
-                  className={cn(
-                    "w-full p-3.5 rounded-xl border text-left transition-all flex items-start justify-between gap-3",
-                    isSelected
-                      ? "bg-secondary border-primary/40 shadow-sm"
-                      : "bg-card border-border hover:bg-accent/50"
-                  )}
+                  className="cursor-pointer p-3.5"
                 >
-                  <div className="space-y-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className="font-mono text-xs font-semibold text-foreground">
-                        {scen.incidentCode}
-                      </span>
-                      <Badge variant={difficultyBadgeVariant(scen.difficulty)}>
-                        {scen.difficulty}
-                      </Badge>
-                      <span className="text-[11px] font-mono text-emerald-400">
-                        +{scen.xpReward} XP
-                      </span>
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="space-y-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="font-mono text-xs font-semibold text-foreground">
+                          {scen.incidentCode}
+                        </span>
+                        <Badge
+                          variant={difficultyBadgeVariant(scen.difficulty)}
+                        >
+                          {scen.difficulty}
+                        </Badge>
+                        <span className="text-[11px] font-mono text-emerald-400">
+                          +{scen.xpReward} XP
+                        </span>
+                      </div>
+                      <div className="text-xs font-semibold text-foreground truncate">
+                        {scen.title}
+                      </div>
+                      <div className="text-[11px] text-muted-foreground font-mono">
+                        {scen.category}
+                      </div>
                     </div>
-                    <div className="text-xs font-semibold text-foreground truncate">
-                      {scen.title}
-                    </div>
-                    <div className="text-[11px] text-muted-foreground font-mono">
-                      {scen.category}
+                    <div className="shrink-0 mt-1">
+                      {isSolved ? (
+                        <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                      ) : (
+                        <Circle className="w-4 h-4 text-muted-foreground/40" />
+                      )}
                     </div>
                   </div>
-                  <div className="shrink-0 mt-1">
-                    {isSolved ? (
-                      <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                    ) : (
-                      <Circle className="w-4 h-4 text-muted-foreground/40" />
-                    )}
-                  </div>
-                </button>
+                </Card3DTilt>
               );
             })}
           </div>
 
-          {/* Active Incident Card (shadcn/ui Card + Kibo UI Snippet) */}
-          <Card>
+          {/* Active Incident Card with Magic UI BorderBeam */}
+          <Card className="relative overflow-hidden">
+            <BorderBeam
+              size={180}
+              duration={14}
+              colorFrom="#f43f5e"
+              colorTo="#f59e0b"
+            />
             <CardHeader className="pb-3 border-b border-border">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-sm flex items-center gap-2 text-rose-400">
@@ -254,17 +267,17 @@ export const ProductionArena: React.FC<ProductionArenaProps> = ({
             <CardContent className="pt-4 space-y-4">
               <div className="p-3 rounded-lg bg-secondary/70 border border-border text-xs">
                 <span className="font-mono text-[10px] text-muted-foreground block mb-1">
-                  Target Objective
+                  Objectif de mission
                 </span>
                 <span className="text-foreground font-medium">
                   {activeScenario.missionGoal}
                 </span>
               </div>
 
-              {/* Live Objectives Checklist */}
-              <div className="space-y-2">
+              {/* Live Objectives Checklist with AutoAnimate */}
+              <div ref={objectivesRef} className="space-y-2">
                 <span className="text-xs font-medium text-muted-foreground block">
-                  Live Verification Criteria
+                  Critères de vérification en direct
                 </span>
                 {activeScenario.objectives.map((obj) => {
                   const passed = obj.check(gitState, cmdHistory);
@@ -293,7 +306,7 @@ export const ProductionArena: React.FC<ProductionArenaProps> = ({
               <div className="pt-3 border-t border-border space-y-3">
                 <div className="flex items-center justify-between text-xs font-mono">
                   <span className="text-muted-foreground">
-                    Step Replay ({stepPlayIdx}/
+                    Simulation pas à pas ({stepPlayIdx}/
                     {activeScenario.solutionSteps.length})
                   </span>
                   <button
@@ -306,25 +319,28 @@ export const ProductionArena: React.FC<ProductionArenaProps> = ({
                     className="text-amber-400 hover:underline flex items-center gap-1"
                   >
                     <Lightbulb className="w-3.5 h-3.5" />
-                    Hint ({hintsCount}/{activeScenario.hints.length})
+                    Indice ({hintsCount}/{activeScenario.hints.length})
                   </button>
                 </div>
 
                 <div className="flex gap-2">
-                  <Button
+                  <GlowButton
+                    type="button"
                     onClick={handlePlayNextStep}
                     disabled={
                       stepPlayIdx >= activeScenario.solutionSteps.length
                     }
-                    variant="default"
+                    variant="indigo"
                     size="sm"
-                    className="flex-1 text-xs"
-                    icon={<StepForward className="w-3.5 h-3.5" />}
+                    className="flex-1"
                   >
-                    {stepPlayIdx < activeScenario.solutionSteps.length
-                      ? `Run Step ${stepPlayIdx + 1} on Graph`
-                      : "All steps executed"}
-                  </Button>
+                    <StepForward className="w-3.5 h-3.5" />
+                    <span>
+                      {stepPlayIdx < activeScenario.solutionSteps.length
+                        ? `Exécuter étape ${stepPlayIdx + 1}`
+                        : "Toutes les étapes jouées"}
+                    </span>
+                  </GlowButton>
                   <Button
                     onClick={handleResetScenario}
                     variant="outline"
@@ -347,7 +363,7 @@ export const ProductionArena: React.FC<ProductionArenaProps> = ({
                               key={idx}
                               value={`step-${idx}`}
                             >
-                              Step {idx + 1}
+                              Étape {idx + 1}
                             </SnippetTabsTrigger>
                           ))}
                       </SnippetTabsList>
@@ -387,14 +403,22 @@ export const ProductionArena: React.FC<ProductionArenaProps> = ({
         {/* Right Column: Live Gitgraph.js Canvas + Interactive Terminal */}
         <div className="lg:col-span-8 space-y-4">
           {justSolvedBanner && (
-            <Card className="border-emerald-500/50 bg-emerald-950/20 p-4">
+            <Card className="relative overflow-hidden border-emerald-500/50 bg-emerald-950/20 p-4">
+              <BorderBeam
+                size={160}
+                duration={8}
+                colorFrom="#10b981"
+                colorTo="#38bdf8"
+              />
               <div className="flex items-center gap-3">
                 <div className="w-9 h-9 rounded-lg bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400">
                   <Trophy className="w-5 h-5" />
                 </div>
                 <div>
                   <div className="text-sm font-bold text-emerald-300 flex items-center gap-2">
-                    <span>Incident {activeScenario.incidentCode} Resolved</span>
+                    <span>
+                      Incident {activeScenario.incidentCode} Résolu !
+                    </span>
                     <Badge variant="emerald">
                       +{activeScenario.xpReward} XP
                     </Badge>

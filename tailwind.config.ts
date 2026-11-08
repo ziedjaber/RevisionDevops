@@ -11,18 +11,17 @@ const config: Config = {
     extend: {
       fontFamily: {
         sans: [
-          "Geist",
+          "var(--font-sans)",
           "Plus Jakarta Sans",
+          "Geist",
           "Inter",
           "-apple-system",
           "BlinkMacSystemFont",
-          "Segoe UI",
-          "Roboto",
           "sans-serif",
         ],
         mono: [
+          "var(--font-mono)",
           "JetBrains Mono",
-          "Geist Mono",
           "Fira Code",
           "Consolas",
           "monospace",
@@ -67,6 +66,33 @@ const config: Config = {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+      },
+      animation: {
+        "border-beam": "border-beam calc(var(--duration)*1s) infinite linear",
+        aurora: "aurora 18s ease-in-out infinite alternate",
+        shimmer: "shimmer 3s linear infinite",
+      },
+      keyframes: {
+        "border-beam": {
+          "100%": {
+            "offset-distance": "100%",
+          },
+        },
+        aurora: {
+          "0%": {
+            transform: "translate3d(0, 0, 0) scale(1)",
+          },
+          "50%": {
+            transform: "translate3d(4%, -3%, 0) scale(1.06)",
+          },
+          "100%": {
+            transform: "translate3d(-3%, 4%, 0) scale(0.98)",
+          },
+        },
+        shimmer: {
+          "0%": { backgroundPosition: "200% 0" },
+          "100%": { backgroundPosition: "-200% 0" },
+        },
       },
     },
   },
