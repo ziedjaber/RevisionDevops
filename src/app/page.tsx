@@ -1,238 +1,291 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Navbar } from "@/components/layout/Navbar";
-import { Footer } from "@/components/layout/Footer";
-import { chaptersData } from "@/data/chaptersData";
-import { ChapterList } from "@/components/courses/ChapterList";
-import { ChapterViewer } from "@/components/courses/ChapterViewer";
+import { TopCommandBar } from "@/components/layout/TopCommandBar";
+import { ProductionArena } from "@/components/arena/ProductionArena";
+import { CommandDrillMode } from "@/components/drills/CommandDrillMode";
+import { TimedQuizArena } from "@/components/quiz/TimedQuizArena";
 import { GitSimulator } from "@/components/simulator/GitSimulator";
-import { ExerciseLab } from "@/components/exercises/ExerciseLab";
-import { ExamQuiz } from "@/components/quiz/ExamQuiz";
-import { ConfigGenerator } from "@/components/tools/ConfigGenerator";
-import { GitCheatSheet } from "@/components/tools/GitCheatSheet";
+import { SkillBadgesAndErrors } from "@/components/gamification/SkillBadgesAndErrors";
+import { badgesData } from "@/data/badgesData";
 import {
-  GitBranch,
-  Terminal,
-  BookOpen,
-  Award,
-  Zap,
-  CheckCircle2,
-  Boxes,
-  ArrowRight,
-  Sparkles,
-} from "lucide-react";
-import { Button } from "@/components/ui/Button";
-import { Badge } from "@/components/ui/Badge";
+  GameMode,
+  PlayerStats,
+  ArenaScenario,
+  CommandDrill,
+  MistakeRecord,
+} from "@/types/game";
+import { generateShortId } from "@/lib/utils";
+import { Award, X } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
-export default function Home() {
-  const [activeTab, setActiveTab] = useState<
-    "courses" | "simulator" | "exercises" | "quiz" | "generator" | "cheatsheet"
-  >("courses");
+const INITIAL_STATS: PlayerStats = {
+  xp: 0,
+  currentStreak: 0,
+  maxStreak: 0,
+  solvedArenaIds: [],
+  completedDrillIds: [],
+  quizPerfectRuns: 0,
+  totalQuestionsAnswered: 0,
+  totalCorrectAnswers: 0,
+  unlockedBadgeIds: [],
+  mistakes: [],
+};
 
-  const [selectedChapterId, setSelectedChapterId] = useState<number>(1);
-  const [completedChapters, setCompletedChapters] = useState<number[]>([]);
-  const [completedExercises, setCompletedExercises] = useState<string[]>([]);
+function computeUnlockedBadges(stats: PlayerStats): string[] {
+  const unlocked = new Set<string>(stats.unlockedBadgeIds);
 
-  // Load progress from localStorage on mount
+  if (
+    stats.solvedArenaIds.length +
+      stats.completedDrillIds.length +
+      stats.totalCorrectAnswers >=
+    1
+  ) {
+    unlocked.add("first-blood");
+  }
+  if (stats.maxStreak >= 3) unlocked.add("streak-3");
+  if (stats.maxStreak >= 7) unlocked.add("streak-7");
+  if (stats.solvedArenaIds.includes("inc-101-detached-head"))
+    unlocked.add("detached-survivor");
+  if (stats.solvedArenaIds.includes("inc-202-3way-merge"))
+    unlocked.add("merge-arbiter");
+  if (stats.solvedArenaIds.includes("inc-301-linear-rebase"))
+    unlocked.add("rebase-surgeon");
+  if (stats.solvedArenaIds.includes("inc-404-gitflow-hotfix"))
+    unlocked.add("hotfix-commander");
+  if (stats.completedDrillIds.length >= 8) unlocked.add("drill-sergeant");
+  if (stats.completedDrillIds.length >= 16) unlocked.add("drill-overlord");
+  if (stats.quizPerfectRuns >= 1) unlocked.add("quiz-sharpshooter");
+  if (stats.xp >= 1000) unlocked.add("xp-1000");
+  if (stats.solvedArenaIds.length >= 6) unlocked.add("arena-champion");
+
+  return Array.from(unlocked);
+}
+
+export default function DrillChallengePlatform() {
+  const [activeMode, setActiveMode] = useState<GameMode>("arena");
+  const [stats, setStats] = useState<PlayerStats>(INITIAL_STATS);
+  const [recentBadgeName, setRecentBadgeName] = useState<string | null>(null);
+
+  // Load saved gamification state
   useEffect(() => {
     try {
-      const savedChapters = localStorage.getItem("devops_lab_chapters");
-      if (savedChapters) setCompletedChapters(JSON.parse(savedChapters));
-
-      const savedExercises = localStorage.getItem("devops_lab_exercises");
-      if (savedExercises) setCompletedExercises(JSON.parse(savedExercises));
+      const saved = localStorage.getItem("devops_drill_arena_stats_v2");
+      if (saved) {
+        setStats(JSON.parse(saved));
+      }
     } catch (e) {
-      console.error("Failed to load progress from localStorage", e);
+      console.error("Failed to load stats", e);
     }
   }, []);
 
-  // Save progress changes
-  const handleToggleChapter = (chapterId: number) => {
-    setCompletedChapters((prev) => {
-      const next = prev.includes(chapterId)
-        ? prev.filter((id) => id !== chapterId)
-        : [...prev, chapterId];
+  const updateStats = (updater: (prev: PlayerStats) => PlayerStats) => {
+    setStats((prev) => {
+      const updated = updater(prev);
+      const nextBadges = computeUnlockedBadges(updated);
+
+      // Check if a new badge was just unlocked
+      const newlyAdded = nextBadges.find(
+        (id) => !prev.unlockedBadgeIds.includes(id)
+      );
+      if (newlyAdded) {
+        const badgeObj = badgesData.find((b) => b.id === newlyAdded);
+        if (badgeObj) setRecentBadgeName(badgeObj.name);
+      }
+
+      const finalState: PlayerStats = {
+        ...updated,
+        unlockedBadgeIds: nextBadges,
+      };
+
       try {
-        localStorage.setItem("devops_lab_chapters", JSON.stringify(next));
+        localStorage.setItem(
+          "devops_drill_arena_stats_v2",
+          JSON.stringify(finalState)
+        );
       } catch (e) {}
-      return next;
+
+      return finalState;
     });
   };
 
-  const handleToggleExercise = (exerciseId: string) => {
-    setCompletedExercises((prev) => {
-      const next = prev.includes(exerciseId)
-        ? prev.filter((id) => id !== exerciseId)
-        : [...prev, exerciseId];
-      try {
-        localStorage.setItem("devops_lab_exercises", JSON.stringify(next));
-      } catch (e) {}
-      return next;
+  // Handlers for Mode 1: Production Arena
+  const handleSolveArenaScenario = (scenario: ArenaScenario) => {
+    updateStats((prev) => {
+      const alreadySolved = prev.solvedArenaIds.includes(scenario.id);
+      const nextStreak = prev.currentStreak + 1;
+      return {
+        ...prev,
+        xp: prev.xp + (alreadySolved ? 50 : scenario.xpReward),
+        currentStreak: nextStreak,
+        maxStreak: Math.max(prev.maxStreak, nextStreak),
+        solvedArenaIds: alreadySolved
+          ? prev.solvedArenaIds
+          : [...prev.solvedArenaIds, scenario.id],
+      };
     });
   };
 
-  const currentChapter = chaptersData.find((c) => c.id === selectedChapterId) || chaptersData[0];
+  // Handlers for Mode 2: Command Drills
+  const handlePassDrill = (drill: CommandDrill, bonusXp: number) => {
+    updateStats((prev) => {
+      const alreadyDone = prev.completedDrillIds.includes(drill.id);
+      const nextStreak = prev.currentStreak + 1;
+      const baseEarned = alreadyDone
+        ? Math.round(drill.xpReward * 0.4)
+        : drill.xpReward;
+      return {
+        ...prev,
+        xp: prev.xp + baseEarned + bonusXp,
+        currentStreak: nextStreak,
+        maxStreak: Math.max(prev.maxStreak, nextStreak),
+        completedDrillIds: alreadyDone
+          ? prev.completedDrillIds
+          : [...prev.completedDrillIds, drill.id],
+      };
+    });
+  };
+
+  // Handlers for Mode 3: Timed Quiz
+  const handleQuizCorrect = (pointsEarned: number) => {
+    updateStats((prev) => {
+      const nextStreak = prev.currentStreak + 1;
+      return {
+        ...prev,
+        xp: prev.xp + pointsEarned,
+        currentStreak: nextStreak,
+        maxStreak: Math.max(prev.maxStreak, nextStreak),
+        totalQuestionsAnswered: prev.totalQuestionsAnswered + 1,
+        totalCorrectAnswers: prev.totalCorrectAnswers + 1,
+      };
+    });
+  };
+
+  const handleCompletePerfectQuiz = () => {
+    updateStats((prev) => ({
+      ...prev,
+      xp: prev.xp + 250,
+      quizPerfectRuns: prev.quizPerfectRuns + 1,
+    }));
+  };
+
+  // Shared Mistake Recorder (Resets currentStreak & logs detailed Post-Mortem)
+  const handleRecordMistake = (
+    mistake: Omit<MistakeRecord, "id" | "timestamp">
+  ) => {
+    const now = new Date().toLocaleTimeString("fr-FR", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+    updateStats((prev) => ({
+      ...prev,
+      currentStreak: 0,
+      totalQuestionsAnswered:
+        mistake.mode === "quiz"
+          ? prev.totalQuestionsAnswered + 1
+          : prev.totalQuestionsAnswered,
+      mistakes: [
+        {
+          ...mistake,
+          id: generateShortId(),
+          timestamp: now,
+        },
+        ...prev.mistakes,
+      ],
+    }));
+  };
+
+  const handleRemoveMistake = (id: string) => {
+    updateStats((prev) => ({
+      ...prev,
+      mistakes: prev.mistakes.filter((m) => m.id !== id),
+    }));
+  };
+
+  const handleClearMistakes = () => {
+    updateStats((prev) => ({
+      ...prev,
+      mistakes: [],
+    }));
+  };
 
   return (
-    <div className="flex-1 flex flex-col min-h-screen">
-      <Navbar
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
-        completedChaptersCount={completedChapters.length}
-        completedExercisesCount={completedExercises.length}
+    <div className="min-h-screen flex flex-col bg-[#090a0f] text-zinc-100">
+      {/* Top Gamification & Mode Switcher Bar */}
+      <TopCommandBar
+        activeMode={activeMode}
+        onSelectMode={setActiveMode}
+        stats={stats}
       />
 
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-10">
-        {/* Hero Section Banner */}
-        <section className="relative p-8 sm:p-10 rounded-3xl border border-zinc-800 bg-gradient-to-br from-zinc-900/90 via-[#0E111B] to-zinc-950/90 backdrop-blur-xl shadow-subtle-card overflow-hidden">
-          <div className="absolute top-0 right-1/4 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute bottom-0 right-0 w-80 h-80 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
-
-          <div className="relative z-10 max-w-3xl space-y-4">
-            <div className="flex flex-wrap items-center gap-2">
-              <Badge variant="gold">
-                <Sparkles className="w-3 h-3 mr-1 inline" />
-                Plateforme Universitaire Interactive &bull; ISIMS
-              </Badge>
-              <Badge variant="cyan">Promotion 2026</Badge>
+      {/* Badge Unlocked Floating Toast */}
+      <AnimatePresence>
+        {recentBadgeName && (
+          <motion.div
+            initial={{ opacity: 0, y: -20, x: 20 }}
+            animate={{ opacity: 1, y: 0, x: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="fixed bottom-6 right-6 z-50 p-4 rounded-2xl border-2 border-amber-400/70 bg-[#12151d]/95 backdrop-blur-xl shadow-gold-glow flex items-center gap-3.5"
+          >
+            <div className="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-400/50 flex items-center justify-center text-amber-400">
+              <Award className="w-5 h-5" />
             </div>
-
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-zinc-100 tracking-tight leading-tight">
-              DevOps &amp; Git <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-amber-200 to-cyan-400">Mastery Lab</span>
-            </h1>
-
-            <p className="text-sm sm:text-base text-zinc-300 leading-relaxed">
-              La plateforme complète d&apos;entraînement basée sur le cours <strong className="text-zinc-100">&laquo; Plateformes Collaboratives - DevOps &amp; Gestion de version Git &raquo;</strong> du Pr. Bassem BOUAZIZ.
-              Explorez les 8 chapitres, expérimentez avec le simulateur graphique de commits et résolvez des pannes de production réelles.
-            </p>
-
-            {/* Quick Action Buttons */}
-            <div className="flex flex-wrap items-center gap-3 pt-2">
-              <Button
-                onClick={() => setActiveTab("simulator")}
-                variant="primary"
-                size="md"
-                icon={<Terminal className="w-4 h-4 text-zinc-950 fill-current" />}
-              >
-                Ouvrir le Simulateur Git Graph
-              </Button>
-              <Button
-                onClick={() => setActiveTab("courses")}
-                variant="outline"
-                size="md"
-                icon={<BookOpen className="w-4 h-4 text-amber-400" />}
-              >
-                Explorer les 8 Chapitres
-              </Button>
-              <Button
-                onClick={() => setActiveTab("quiz")}
-                variant="secondary"
-                size="md"
-                icon={<Award className="w-4 h-4 text-cyan-400" />}
-              >
-                Passer l&apos;Examen Blanc
-              </Button>
+            <div>
+              <span className="text-[10px] font-mono uppercase tracking-wider text-amber-400 font-bold block">
+                Nouveau Badge Débloqué !
+              </span>
+              <span className="text-sm font-extrabold text-zinc-100">
+                {recentBadgeName}
+              </span>
             </div>
+            <button
+              onClick={() => setRecentBadgeName(null)}
+              className="text-zinc-500 hover:text-zinc-200 ml-2"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-            {/* Stats Metrics Strip */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-6 border-t border-zinc-800/80 text-xs font-mono">
-              <div className="p-2.5 rounded-xl bg-zinc-900/60 border border-zinc-800">
-                <span className="text-zinc-500 block text-[10px] uppercase font-sans">Curriculum</span>
-                <span className="text-zinc-100 font-bold text-sm">8 Chapitres</span>
-              </div>
-              <div className="p-2.5 rounded-xl bg-zinc-900/60 border border-zinc-800">
-                <span className="text-zinc-500 block text-[10px] uppercase font-sans">Slides Lues</span>
-                <span className="text-amber-400 font-bold text-sm">218 Slides</span>
-              </div>
-              <div className="p-2.5 rounded-xl bg-zinc-900/60 border border-zinc-800">
-                <span className="text-zinc-500 block text-[10px] uppercase font-sans">Simulateur</span>
-                <span className="text-cyan-400 font-bold text-sm">SHA-1 &amp; Lanes</span>
-              </div>
-              <div className="p-2.5 rounded-xl bg-zinc-900/60 border border-zinc-800">
-                <span className="text-zinc-500 block text-[10px] uppercase font-sans">Scénarios</span>
-                <span className="text-emerald-400 font-bold text-sm">6 Cas Pratiques</span>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Tab 1: Courses (8 Chapters) */}
-        {activeTab === "courses" && (
-          <section className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-              {/* Left Column: Chapters Navigation */}
-              <div className="lg:col-span-4 sticky top-24">
-                <ChapterList
-                  chapters={chaptersData}
-                  selectedChapterId={selectedChapterId}
-                  completedChapterIds={completedChapters}
-                  onSelectChapter={setSelectedChapterId}
-                />
-              </div>
-
-              {/* Right Column: Active Chapter Content */}
-              <div className="lg:col-span-8">
-                <ChapterViewer
-                  chapter={currentChapter}
-                  isCompleted={completedChapters.includes(currentChapter.id)}
-                  onToggleComplete={handleToggleChapter}
-                  onNextChapter={
-                    selectedChapterId < chaptersData.length
-                      ? () => setSelectedChapterId(selectedChapterId + 1)
-                      : undefined
-                  }
-                  onPrevChapter={
-                    selectedChapterId > 1
-                      ? () => setSelectedChapterId(selectedChapterId - 1)
-                      : undefined
-                  }
-                />
-              </div>
-            </div>
-          </section>
+      {/* Main Content Area */}
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        {activeMode === "arena" && (
+          <ProductionArena
+            solvedArenaIds={stats.solvedArenaIds}
+            onSolveScenario={handleSolveArenaScenario}
+            onRecordMistake={handleRecordMistake}
+          />
         )}
 
-        {/* Tab 2: Interactive Git Graph Simulator */}
-        {activeTab === "simulator" && (
-          <section>
-            <GitSimulator />
-          </section>
+        {activeMode === "drills" && (
+          <CommandDrillMode
+            completedDrillIds={stats.completedDrillIds}
+            currentStreak={stats.currentStreak}
+            onPassDrill={handlePassDrill}
+            onFailDrill={handleRecordMistake}
+          />
         )}
 
-        {/* Tab 3: Practical Exercises Lab */}
-        {activeTab === "exercises" && (
-          <section>
-            <ExerciseLab
-              completedExerciseIds={completedExercises}
-              onToggleSolved={handleToggleExercise}
-            />
-          </section>
+        {activeMode === "quiz" && (
+          <TimedQuizArena
+            currentStreak={stats.currentStreak}
+            onCorrectAnswer={handleQuizCorrect}
+            onWrongAnswer={handleRecordMistake}
+            onCompletePerfectQuiz={handleCompletePerfectQuiz}
+          />
         )}
 
-        {/* Tab 4: Exam & Certification Quiz */}
-        {activeTab === "quiz" && (
-          <section>
-            <ExamQuiz />
-          </section>
-        )}
+        {activeMode === "sandbox" && <GitSimulator />}
 
-        {/* Tab 5: YAML Config Generator */}
-        {activeTab === "generator" && (
-          <section>
-            <ConfigGenerator />
-          </section>
-        )}
-
-        {/* Tab 6: Git Cheat Sheet */}
-        {activeTab === "cheatsheet" && (
-          <section>
-            <GitCheatSheet />
-          </section>
+        {activeMode === "profile" && (
+          <SkillBadgesAndErrors
+            stats={stats}
+            onClearMistakes={handleClearMistakes}
+            onRemoveMistake={handleRemoveMistake}
+          />
         )}
       </main>
-
-      <Footer />
     </div>
   );
 }
