@@ -1,19 +1,28 @@
 "use client";
 
 import React from "react";
+import { GameMode, PlayerStats } from "@/types/game";
 import {
-  Flame,
-  Trophy,
-  Terminal,
   ShieldAlert,
+  Terminal,
   Timer,
   GitBranch,
   Award,
-  AlertOctagon,
+  Flame,
+  Zap,
+  Sparkles,
 } from "lucide-react";
-import { GameMode, PlayerStats } from "@/types/game";
-import { cn } from "@/lib/utils";
-import { motion } from "framer-motion";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/Tabs";
+import { Badge } from "@/components/ui/Badge";
+import {
+  Pill,
+  PillStatus,
+  PillIndicator,
+  PillDelta,
+  Status,
+  StatusIndicator,
+  StatusLabel,
+} from "@/components/ui/kibo-ui";
 
 interface TopCommandBarProps {
   activeMode: GameMode;
@@ -21,11 +30,37 @@ interface TopCommandBarProps {
   stats: PlayerStats;
 }
 
-export function getRankTitle(xp: number): { title: string; nextXp: number } {
-  if (xp >= 1500) return { title: "Principal DevOps Lead", nextXp: 2500 };
-  if (xp >= 900) return { title: "Senior CI/CD Architect", nextXp: 1500 };
-  if (xp >= 400) return { title: "Mid Git & Docker Engineer", nextXp: 900 };
-  return { title: "Junior DevOps Operator", nextXp: 400 };
+export function getRankTitle(xp: number): {
+  title: string;
+  nextXp: number;
+  color: string;
+} {
+  if (xp >= 2500) {
+    return {
+      title: "Principal DevOps Architect",
+      nextXp: 5000,
+      color: "text-amber-400",
+    };
+  }
+  if (xp >= 1200) {
+    return {
+      title: "Staff Release Engineer",
+      nextXp: 2500,
+      color: "text-emerald-400",
+    };
+  }
+  if (xp >= 500) {
+    return {
+      title: "Site Reliability Engineer",
+      nextXp: 1200,
+      color: "text-sky-400",
+    };
+  }
+  return {
+    title: "Junior DevOps Engineer",
+    nextXp: 500,
+    color: "text-foreground",
+  };
 }
 
 export const TopCommandBar: React.FC<TopCommandBarProps> = ({
@@ -38,203 +73,126 @@ export const TopCommandBar: React.FC<TopCommandBarProps> = ({
   const modes: {
     id: GameMode;
     label: string;
-    sub: string;
     icon: React.ElementType;
-    badgeCount?: number;
-    badgeColor?: string;
+    count?: string;
   }[] = [
     {
       id: "arena",
-      label: "1. Arena de Prod",
-      sub: `${stats.solvedArenaIds.length}/6 résolus`,
+      label: "1. Incident Arena",
       icon: ShieldAlert,
+      count: `${stats.solvedArenaIds.length}/6`,
     },
     {
       id: "drills",
       label: "2. Command Drills",
-      sub: `${stats.completedDrillIds.length}/18 validés`,
       icon: Terminal,
+      count: `${stats.completedDrillIds.length}/20`,
     },
     {
       id: "quiz",
-      label: "3. Quiz Chronométré",
-      sub: "Junior • Mid • Lead",
+      label: "3. Speed Quiz",
       icon: Timer,
+      count: "24",
     },
     {
       id: "sandbox",
-      label: "4. Graphe Git Libre",
-      sub: "Simulateur SHA-1",
+      label: "4. Gitgraph.js Lab",
       icon: GitBranch,
+      count: "DAG",
     },
     {
       id: "profile",
-      label: "Badges & Erreurs",
-      sub: `${stats.unlockedBadgeIds.length}/12 badges`,
+      label: "Post-Mortem & Badges",
       icon: Award,
-      badgeCount: stats.mistakes.length,
-      badgeColor: "bg-rose-500/20 text-rose-400 border-rose-500/40",
+      count:
+        stats.mistakes.length > 0
+          ? `${stats.mistakes.length}`
+          : `${stats.unlockedBadgeIds.length}/12`,
     },
   ];
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-slate-800 bg-[#0b0f17]/90 backdrop-blur-xl">
+    <header className="sticky top-0 z-40 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Top Row: Brand + Live Gamification HUD */}
-        <div className="flex flex-wrap items-center justify-between py-3 gap-4 border-b border-slate-800/80">
-          {/* Brand */}
-          <div
-            onClick={() => onSelectMode("arena")}
-            className="flex items-center gap-3 cursor-pointer group"
-          >
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500/20 via-slate-900 to-indigo-500/20 border border-blue-500/40 flex items-center justify-center shadow-tech-glow transition-transform duration-200 group-hover:scale-105">
-              <Terminal className="w-5 h-5 text-blue-400" />
+        {/* Top Row: Brand + Kibo UI Status & Telemetry Pills */}
+        <div className="flex h-14 items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-border bg-secondary text-foreground shadow-sm">
+              <GitBranch className="h-4 w-4 text-emerald-400" />
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="text-base font-extrabold tracking-tight text-slate-100">
-                  DEVOPS &amp; GIT{" "}
-                  <span className="bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent font-mono">
-                    ENGINEERING LAB
-                  </span>
-                </span>
-                <span className="hidden sm:inline-block px-2 py-0.5 rounded text-[10px] font-mono uppercase tracking-wider bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
-                  100% Practice
-                </span>
-              </div>
-              <p className="text-[11px] text-slate-400 font-mono">
-                Grade : <strong className="text-blue-400">{rank.title}</strong>
-              </p>
+            <div className="flex items-center gap-2.5">
+              <span className="text-sm font-bold tracking-tight text-foreground">
+                RevisionDevops
+              </span>
+              <Badge variant="outline" className="hidden sm:inline-flex font-mono text-[10px]">
+                shadcn/ui + Kibo + Gitgraph.js
+              </Badge>
             </div>
           </div>
 
-          {/* Gamification Live HUD */}
-          <div className="flex items-center gap-3">
-            {/* Streak Counter */}
-            <motion.div
-              key={stats.currentStreak}
-              initial={{ scale: 0.92 }}
-              animate={{ scale: 1 }}
-              className={cn(
-                "px-3.5 py-1.5 rounded-xl border flex items-center gap-2 font-mono text-xs transition-all",
-                stats.currentStreak >= 3
-                  ? "bg-amber-500/15 border-amber-500/50 text-amber-300 shadow-amber-glow"
-                  : "bg-slate-900/90 border-slate-800 text-slate-400"
-              )}
-            >
-              <Flame
-                className={cn(
-                  "w-4 h-4",
-                  stats.currentStreak >= 3
-                    ? "text-amber-400 fill-amber-400 animate-pulse"
-                    : "text-slate-500"
-                )}
-              />
-              <div>
-                <span className="text-[10px] uppercase block text-slate-500 leading-none">
-                  Streak
-                </span>
-                <span className="font-extrabold text-sm text-slate-100">
-                  x{stats.currentStreak}
-                </span>
-              </div>
-              {stats.maxStreak > 0 && (
-                <span className="text-[10px] text-slate-500 border-l border-slate-800 pl-2">
-                  Max: {stats.maxStreak}
-                </span>
-              )}
-            </motion.div>
+          {/* Right Kibo UI Pills & Status */}
+          <div className="flex items-center gap-2">
+            {/* Kibo UI Status indicator */}
+            <Status status="online" className="hidden md:inline-flex">
+              <StatusIndicator />
+              <StatusLabel className="font-mono text-xs text-foreground">
+                {rank.title}
+              </StatusLabel>
+            </Status>
 
-            {/* XP Counter */}
-            <motion.div
-              key={stats.xp}
-              initial={{ y: -3, opacity: 0.85 }}
-              animate={{ y: 0, opacity: 1 }}
-              className="px-4 py-1.5 rounded-xl bg-slate-900/90 border border-blue-500/30 flex items-center gap-2.5 shadow-tech-glow"
-            >
-              <Trophy className="w-4 h-4 text-emerald-400" />
-              <div className="font-mono">
-                <span className="text-[10px] uppercase block text-slate-500 leading-none">
-                  Score XP
-                </span>
-                <span className="text-sm font-extrabold text-emerald-400">
-                  {stats.xp} XP
-                </span>
-              </div>
-            </motion.div>
+            {/* Kibo UI Pill for Streak */}
+            <Pill variant="outline" className="text-xs py-1">
+              <PillStatus>
+                <Flame className="h-3.5 w-3.5 text-amber-400" />
+                <span className="font-mono">Streak</span>
+              </PillStatus>
+              <span className="font-mono font-semibold text-amber-400">
+                x{stats.currentStreak}
+              </span>
+              <PillDelta delta={stats.currentStreak} />
+            </Pill>
 
-            {/* Error Vault Quick Button */}
-            <button
-              onClick={() => onSelectMode("profile")}
-              className={cn(
-                "px-3 py-1.5 rounded-xl border flex items-center gap-2 text-xs font-mono transition-all",
-                stats.mistakes.length > 0
-                  ? "bg-rose-500/10 border-rose-500/40 text-rose-300 hover:bg-rose-500/20"
-                  : "bg-slate-900/90 border-slate-800 text-slate-400 hover:text-slate-200"
-              )}
-              title="Consulter le récapitulatif détaillé des erreurs"
-            >
-              <AlertOctagon
-                className={cn(
-                  "w-4 h-4",
-                  stats.mistakes.length > 0 ? "text-[#f43f5e]" : "text-slate-500"
-                )}
-              />
-              <span className="hidden md:inline">Erreurs :</span>
-              <span className="font-bold">{stats.mistakes.length}</span>
-            </button>
+            {/* Kibo UI Pill for XP */}
+            <Pill variant="secondary" className="text-xs py-1">
+              <PillStatus>
+                <Zap className="h-3.5 w-3.5 text-emerald-400" />
+                <span className="font-mono">XP</span>
+              </PillStatus>
+              <span className="font-mono font-bold text-foreground">
+                {stats.xp.toLocaleString("en-US")}
+              </span>
+            </Pill>
           </div>
         </div>
 
-        {/* Bottom Row: 4 Training Modes + Profile/Errors Navigation */}
-        <nav className="flex items-center gap-2 py-2.5 overflow-x-auto scrollbar-none">
-          {modes.map((m) => {
-            const Icon = m.icon;
-            const isActive = activeMode === m.id;
-            return (
-              <button
-                key={m.id}
-                onClick={() => onSelectMode(m.id)}
-                className={cn(
-                  "flex-shrink-0 px-4 py-2 rounded-xl border text-left transition-all duration-200 flex items-center gap-2.5 relative",
-                  isActive
-                    ? "bg-gradient-to-r from-[#3b82f6]/20 to-[#6366f1]/15 border-blue-500/60 text-blue-300 shadow-tech-glow"
-                    : "bg-slate-900/90 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700"
-                )}
-              >
-                <Icon
-                  className={cn(
-                    "w-4 h-4",
-                    isActive ? "text-blue-400" : "text-slate-500"
-                  )}
-                />
-                <div>
-                  <div
-                    className={cn(
-                      "text-xs font-bold leading-tight",
-                      isActive ? "text-white" : "text-slate-200"
-                    )}
+        {/* Bottom Row: shadcn/ui Tabs Navigation */}
+        <div className="py-2 overflow-x-auto">
+          <Tabs
+            value={activeMode}
+            onValueChange={(v) => onSelectMode(v as GameMode)}
+          >
+            <TabsList className="h-9 w-max min-w-full sm:w-auto justify-start">
+              {modes.map((m) => {
+                const Icon = m.icon;
+                return (
+                  <TabsTrigger
+                    key={m.id}
+                    value={m.id}
+                    className="gap-2 px-3 py-1.5 text-xs"
                   >
-                    {m.label}
-                  </div>
-                  <div className="text-[10px] text-slate-500 font-mono">
-                    {m.sub}
-                  </div>
-                </div>
-                {m.badgeCount !== undefined && m.badgeCount > 0 && (
-                  <span
-                    className={cn(
-                      "ml-1 px-1.5 py-0.5 text-[10px] font-mono font-bold rounded-full border",
-                      m.badgeColor
+                    <Icon className="h-3.5 w-3.5" />
+                    <span>{m.label}</span>
+                    {m.count && (
+                      <span className="ml-1 rounded bg-muted-foreground/15 px-1.5 py-0.2 font-mono text-[10px] text-muted-foreground">
+                        {m.count}
+                      </span>
                     )}
-                  >
-                    {m.badgeCount}
-                  </span>
-                )}
-              </button>
-            );
-          })}
-        </nav>
+                  </TabsTrigger>
+                );
+              })}
+            </TabsList>
+          </Tabs>
+        </div>
       </div>
     </header>
   );

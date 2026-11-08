@@ -1,45 +1,51 @@
-import React from "react";
+import * as React from "react";
+import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
-interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
-  variant?: "blue" | "indigo" | "gold" | "cyan" | "emerald" | "purple" | "neutral" | "rose";
-  size?: "sm" | "md";
+const badgeVariants = cva(
+  "inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+  {
+    variants: {
+      variant: {
+        default:
+          "border-transparent bg-primary text-primary-foreground shadow hover:bg-primary/80",
+        secondary:
+          "border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80",
+        destructive:
+          "border-transparent bg-destructive text-destructive-foreground shadow hover:bg-destructive/80",
+        outline: "text-foreground border-border",
+        amber:
+          "border-amber-500/30 bg-amber-500/10 text-amber-400",
+        gold:
+          "border-amber-500/30 bg-amber-500/10 text-amber-400",
+        emerald:
+          "border-emerald-500/30 bg-emerald-500/10 text-emerald-400",
+        cyan:
+          "border-sky-500/30 bg-sky-500/10 text-sky-400",
+        blue:
+          "border-blue-500/30 bg-blue-500/10 text-blue-400",
+        rose:
+          "border-rose-500/30 bg-rose-500/10 text-rose-400",
+        purple:
+          "border-violet-500/30 bg-violet-500/10 text-violet-400",
+        zinc:
+          "border-border bg-secondary text-muted-foreground",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+    },
+  }
+);
+
+export interface BadgeProps
+  extends React.HTMLAttributes<HTMLDivElement>,
+    VariantProps<typeof badgeVariants> {}
+
+function Badge({ className, variant, ...props }: BadgeProps) {
+  return (
+    <div className={cn(badgeVariants({ variant }), className)} {...props} />
+  );
 }
 
-export const Badge: React.FC<BadgeProps> = ({
-  children,
-  className,
-  variant = "neutral",
-  size = "sm",
-  ...props
-}) => {
-  const variantStyles = {
-    blue: "bg-blue-500/10 text-blue-300 border-blue-500/30",
-    indigo: "bg-indigo-500/10 text-indigo-300 border-indigo-500/30",
-    gold: "bg-amber-500/10 text-amber-300 border-amber-500/30",
-    cyan: "bg-blue-500/10 text-blue-300 border-blue-500/30",
-    emerald: "bg-emerald-500/10 text-emerald-300 border-emerald-500/30",
-    purple: "bg-indigo-500/10 text-indigo-300 border-indigo-500/30",
-    rose: "bg-rose-500/10 text-rose-300 border-rose-500/30",
-    neutral: "bg-slate-800/80 text-slate-300 border-slate-700/60",
-  };
-
-  const sizeStyles = {
-    sm: "text-xs px-2.5 py-0.5",
-    md: "text-sm px-3 py-1",
-  };
-
-  return (
-    <span
-      className={cn(
-        "inline-flex items-center font-medium rounded-full border backdrop-blur-sm transition-all",
-        variantStyles[variant],
-        sizeStyles[size],
-        className
-      )}
-      {...props}
-    >
-      {children}
-    </span>
-  );
-};
+export { Badge, badgeVariants };

@@ -1,86 +1,114 @@
 "use client";
 
 import React from "react";
-import { motion } from "framer-motion";
+import { GameMode, PlayerStats } from "@/types/game";
+import {
+  Announcement,
+  AnnouncementTag,
+  AnnouncementTitle,
+  Pill,
+  PillIndicator,
+  PillStatus,
+} from "@/components/ui/kibo-ui";
+import { ArrowUpRight } from "lucide-react";
 
-const PARTICLES = [
-  { id: 1, x: "12%", y: "18%", size: 3, duration: 9, delay: 0 },
-  { id: 2, x: "28%", y: "62%", size: 2.5, duration: 12, delay: 1.5 },
-  { id: 3, x: "46%", y: "24%", size: 3.5, duration: 10, delay: 0.8 },
-  { id: 4, x: "68%", y: "42%", size: 2, duration: 11, delay: 2.2 },
-  { id: 5, x: "84%", y: "22%", size: 3, duration: 13, delay: 0.4 },
-  { id: 6, x: "76%", y: "78%", size: 2.5, duration: 10, delay: 1.9 },
-  { id: 7, x: "18%", y: "82%", size: 3, duration: 14, delay: 1.1 },
-  { id: 8, x: "55%", y: "74%", size: 2, duration: 9.5, delay: 2.7 },
-];
-
-export const AnimatedEngineeringBg: React.FC = () => {
+export function AnimatedEngineeringBg() {
   return (
-    <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
-      {/* Subtle Top Radial Spotlight */}
-      <div
-        className="absolute inset-0"
-        style={{
-          background:
-            "radial-gradient(circle at 50% 0%, rgba(59, 130, 246, 0.08) 0%, rgba(99, 102, 241, 0.04) 35%, transparent 70%)",
-        }}
-      />
+    <div
+      className="pointer-events-none fixed inset-0 z-0 opacity-[0.18]"
+      style={{
+        backgroundImage:
+          "radial-gradient(hsl(var(--border)) 1px, transparent 1px)",
+        backgroundSize: "24px 24px",
+      }}
+    />
+  );
+}
 
-      {/* Animated Pulsing SVG Engineering Grid (opacity-15) */}
-      <motion.div
-        initial={{ opacity: 0.1 }}
-        animate={{ opacity: [0.1, 0.16, 0.1] }}
-        transition={{
-          duration: 8,
-          repeat: Infinity,
-          ease: "easeInOut",
-        }}
-        className="absolute inset-0 opacity-15"
-      >
-        <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <pattern
-              id="engineering-grid"
-              width="48"
-              height="48"
-              patternUnits="userSpaceOnUse"
-            >
-              <path
-                d="M 48 0 L 0 0 0 48"
-                fill="none"
-                stroke="#334155"
-                strokeWidth="0.75"
-              />
-              <circle cx="0" cy="0" r="1" fill="#3b82f6" fillOpacity="0.45" />
-            </pattern>
-          </defs>
-          <rect width="100%" height="100%" fill="url(#engineering-grid)" />
-        </svg>
-      </motion.div>
+interface WorkspaceOverviewHeaderProps {
+  activeMode: GameMode;
+  stats: PlayerStats;
+}
 
-      {/* Soft Floating Tech Particles */}
-      {PARTICLES.map((p) => (
-        <motion.div
-          key={p.id}
-          style={{
-            left: p.x,
-            top: p.y,
-            width: p.size,
-            height: p.size,
-          }}
-          animate={{
-            y: [0, -18, 0],
-            opacity: [0.12, 0.32, 0.12],
-          }}
-          transition={{
-            duration: p.duration,
-            delay: p.delay,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
-          className="absolute rounded-full bg-blue-400"
-        />
-      ))}
+const MODE_META: Record<
+  GameMode,
+  { tag: string; announcement: string; title: string; subtitle: string }
+> = {
+  arena: {
+    tag: "Mode 1 · Arena",
+    announcement: "Powered by Gitgraph.js (@gitgraph/core) & Kibo UI Snippets",
+    title: "Production Incident Arena",
+    subtitle:
+      "Resolve real-world Git & DevOps incidents step by step on the live Gitgraph.js commit DAG.",
+  },
+  drills: {
+    tag: "Mode 2 · CLI Drills",
+    announcement: "20 interactive Git, GitLab CI & Docker terminal drills",
+    title: "Interactive CLI Command Drills",
+    subtitle:
+      "Type the exact command for each scenario to build your streak multiplier and unlock badges.",
+  },
+  quiz: {
+    tag: "Mode 3 · Speed Quiz",
+    announcement: "24 timed questions across Junior, Mid and DevOps Lead tiers",
+    title: "Timed DevOps & Git Assessment",
+    subtitle:
+      "Benchmark your mastery under time pressure with automatic Post-Mortem error tracking.",
+  },
+  sandbox: {
+    tag: "Mode 4 · Gitgraph.js",
+    announcement: "Switch between Metro (Bezier) & BlackArrow templates live",
+    title: "Gitgraph.js Interactive Commit Simulator",
+    subtitle:
+      "Experiment freely with branches, fast-forward vs 3-way merges, rebase, tags and the Kibo UI 3-zone file tree.",
+  },
+  profile: {
+    tag: "Diagnostics",
+    announcement: "Review every recorded CLI mistake alongside your 12 skill badges",
+    title: "Skill Badges & Post-Mortem Error Vault",
+    subtitle:
+      "Track your XP progression, unlocked milestones and side-by-side command diagnostics.",
+  },
+};
+
+export function WorkspaceOverviewHeader({
+  activeMode,
+  stats,
+}: WorkspaceOverviewHeaderProps) {
+  const meta = MODE_META[activeMode];
+
+  return (
+    <div className="mb-6 flex flex-col gap-3 border-b border-border pb-5">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        {/* Kibo UI Announcement component */}
+        <Announcement themed>
+          <AnnouncementTag>{meta.tag}</AnnouncementTag>
+          <AnnouncementTitle>
+            <span>{meta.announcement}</span>
+            <ArrowUpRight className="h-3 w-3 text-muted-foreground" />
+          </AnnouncementTitle>
+        </Announcement>
+
+        <div className="flex items-center gap-2">
+          <Pill variant="outline" className="text-xs py-0.5">
+            <PillStatus>
+              <PillIndicator variant="success" pulse />
+              <span>Resolved</span>
+            </PillStatus>
+            <span className="font-mono">
+              {stats.solvedArenaIds.length}/6 incidents ·{" "}
+              {stats.completedDrillIds.length}/20 drills
+            </span>
+          </Pill>
+        </div>
+      </div>
+
+      <div>
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
+          {meta.title}
+        </h1>
+        <p className="text-sm text-muted-foreground mt-1">{meta.subtitle}</p>
+      </div>
     </div>
   );
-};
+}

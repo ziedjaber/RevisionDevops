@@ -2,6 +2,8 @@
 
 import React from "react";
 import { GitBranch, GitMerge, ShieldAlert, RotateCcw, Compass } from "lucide-react";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
+import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
 
 interface GitPresetsProps {
@@ -18,74 +20,80 @@ export const GitPresets: React.FC<GitPresetsProps> = ({
   const presets = [
     {
       id: "initial",
-      title: "Dépôt Standard",
-      desc: "Branche main avec 3 commits linéaires et fichiers prêts à indexer.",
+      title: "Standard Repository",
+      desc: "Branch main with 3 linear commits and modified files ready to stage.",
       icon: GitBranch,
       color: "text-emerald-400",
     },
     {
       id: "divergent",
-      title: "Branches Divergentes",
-      desc: "main et feature/oauth ont divergé. Testez 'git merge' ou 'git rebase' !",
+      title: "Divergent Branches",
+      desc: "main and feature/oauth have diverged. Practice 'git merge' or 'git rebase'.",
       icon: GitMerge,
-      color: "text-blue-400",
+      color: "text-sky-400",
     },
     {
       id: "gitflow",
-      title: "Architecture Git Flow",
-      desc: "main, develop et feature/cart en parallèle avec fichiers modifiés.",
+      title: "GitFlow Architecture",
+      desc: "main, develop and feature/cart in parallel with staged changes.",
       icon: Compass,
-      color: "text-indigo-400",
+      color: "text-violet-400",
     },
     {
       id: "detached",
-      title: "État Detached HEAD",
-      desc: "HEAD pointe sur un commit orphelin (Ambre/Rubis). Entraînez-vous à l'ancrer.",
+      title: "Detached HEAD State",
+      desc: "HEAD points directly to an orphaned commit. Practice anchoring it to a branch.",
       icon: ShieldAlert,
       color: "text-rose-400",
     },
   ];
 
   return (
-    <div className="rounded-2xl border border-slate-800 bg-slate-900/90 p-4 backdrop-blur-xl shadow-saas-card">
-      <div className="flex items-center justify-between mb-3 pb-2 border-b border-slate-800">
-        <span className="text-xs uppercase tracking-wider text-blue-400 font-semibold font-mono">
-          Topologies de Dépôt en 1 Clic
-        </span>
-        <button
+    <Card className="border-border bg-card/95">
+      <CardHeader className="flex flex-row items-center justify-between px-5 py-3 border-b border-border bg-muted/30 space-y-0">
+        <CardTitle className="text-xs font-mono text-muted-foreground">
+          1-Click Repository Topologies
+        </CardTitle>
+        <Button
           onClick={onReset}
-          className="text-xs text-slate-400 hover:text-blue-400 flex items-center gap-1 transition-colors font-mono"
-          title="Réinitialiser l'état actuel"
+          variant="outline"
+          size="sm"
+          className="h-7 text-xs font-mono"
         >
-          <RotateCcw className="w-3.5 h-3.5" />
-          Réinitialiser
-        </button>
-      </div>
+          <RotateCcw className="w-3 h-3 mr-1" />
+          Reset
+        </Button>
+      </CardHeader>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
+      <CardContent className="p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         {presets.map((p) => {
           const Icon = p.icon;
           const isSelected = currentPreset === p.id;
           return (
             <button
               key={p.id}
+              type="button"
               onClick={() => onSelectPreset(p.id)}
               className={cn(
-                "p-3.5 rounded-xl border text-left transition-all relative",
+                "p-3.5 rounded-xl border text-left transition-all",
                 isSelected
-                  ? "bg-slate-800/90 border-blue-500/60 shadow-tech-glow"
-                  : "bg-slate-950/50 border-slate-800 hover:bg-slate-900 hover:border-slate-700"
+                  ? "bg-secondary border-primary/40 shadow-sm"
+                  : "bg-background/60 border-border hover:bg-accent/50"
               )}
             >
               <div className="flex items-center gap-2 mb-1">
                 <Icon className={cn("w-4 h-4", p.color)} />
-                <span className="text-xs font-bold text-slate-100">{p.title}</span>
+                <span className="text-xs font-semibold text-foreground">
+                  {p.title}
+                </span>
               </div>
-              <p className="text-[11px] text-slate-400 leading-snug">{p.desc}</p>
+              <p className="text-[11px] text-muted-foreground leading-snug">
+                {p.desc}
+              </p>
             </button>
           );
         })}
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 };

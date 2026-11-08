@@ -17,10 +17,26 @@ import {
   AlertTriangle,
   Play,
 } from "lucide-react";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  CardFooter,
+} from "@/components/ui/Card";
+import { Progress } from "@/components/ui/Progress";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
+import {
+  Pill,
+  PillStatus,
+  PillIndicator,
+  Status,
+  StatusIndicator,
+  StatusLabel,
+} from "@/components/ui/kibo-ui";
 import { cn } from "@/lib/utils";
-import { motion } from "framer-motion";
 import confetti from "canvas-confetti";
 
 interface TimedQuizArenaProps {
@@ -41,7 +57,9 @@ export const TimedQuizArena: React.FC<TimedQuizArenaProps> = ({
   onWrongAnswer,
   onCompletePerfectQuiz,
 }) => {
-  const [selectedTier, setSelectedTier] = useState<DifficultyLevel | "All">("Junior");
+  const [selectedTier, setSelectedTier] = useState<DifficultyLevel | "All">(
+    "Junior"
+  );
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [questionPool, setQuestionPool] = useState<TimedQuizQuestion[]>([]);
   const [currentIdx, setCurrentIdx] = useState<number>(0);
@@ -104,7 +122,7 @@ export const TimedQuizArena: React.FC<TimedQuizArenaProps> = ({
       difficulty: activeQuestion.difficulty,
       category: activeQuestion.category,
       prompt: activeQuestion.question,
-      userAnswer: "⏱ Temps écoulé (Timeout)",
+      userAnswer: "Timeout (Time limit exceeded)",
       correctAnswer: activeQuestion.options[activeQuestion.correctIndex],
       explanation: activeQuestion.explanation,
     });
@@ -130,10 +148,9 @@ export const TimedQuizArena: React.FC<TimedQuizArenaProps> = ({
       onCorrectAnswer(earned);
 
       confetti({
-        particleCount: 30,
+        particleCount: 25,
         spread: 45,
         origin: { y: 0.8 },
-        colors: ["#10b981", "#3b82f6"],
       });
     } else {
       setSessionMistakes((prev) => [
@@ -165,10 +182,9 @@ export const TimedQuizArena: React.FC<TimedQuizArenaProps> = ({
       if (sessionMistakes.length === 0 && questionPool.length >= 4) {
         onCompletePerfectQuiz();
         confetti({
-          particleCount: 110,
-          spread: 80,
+          particleCount: 90,
+          spread: 70,
           origin: { y: 0.6 },
-          colors: ["#3b82f6", "#10b981", "#6366f1"],
         });
       }
     }
@@ -181,93 +197,81 @@ export const TimedQuizArena: React.FC<TimedQuizArenaProps> = ({
       desc: string;
       timeLabel: string;
       pointsLabel: string;
-      badge: "emerald" | "gold" | "rose" | "blue";
+      badge: "emerald" | "amber" | "rose" | "blue";
     }[] = [
       {
         level: "Junior",
-        title: "Niveau Junior DevOps",
-        desc: "Les 3 zones Git, snapshots SHA-1, pull vs fetch, principes CAMS, REST Stateless et conteneurs vs VM.",
+        title: "Junior DevOps Tier",
+        desc: "The 3 Git local zones, SHA-1 snapshots, pull vs fetch, CAMS principles, REST Stateless and Containers vs VMs.",
         timeLabel: "30s / question",
-        pointsLabel: "100 XP + Bonus vitesse",
+        pointsLabel: "100 XP + Speed Bonus",
         badge: "emerald",
       },
       {
         level: "Mid",
-        title: "Niveau Mid Engineer",
-        desc: "Diff --staged, Fast-Forward vs 3-Way Merge, modes de Reset, Git Flow vs Trunk-Based, GitLab CI et réseaux Bridge.",
+        title: "Mid Engineer Tier",
+        desc: "Diff --staged, Fast-Forward vs 3-Way Merge, Reset modes, GitFlow vs Trunk-Based, GitLab CI and Bridge networks.",
         timeLabel: "35s / question",
-        pointsLabel: "150 XP + Bonus vitesse",
-        badge: "gold",
+        pointsLabel: "150 XP + Speed Bonus",
+        badge: "amber",
       },
       {
         level: "DevOps Lead",
-        title: "Niveau DevOps Lead",
-        desc: "Rebase --onto, pièges Detached HEAD, workflows Linux, pilotes macvlan/overlay, DNS Service Discovery et cache layers.",
+        title: "DevOps Lead Tier",
+        desc: "Rebase --onto, Detached HEAD traps, Linux kernel workflows, macvlan/overlay drivers, DNS Service Discovery and cache layers.",
         timeLabel: "40s / question",
-        pointsLabel: "200 XP + Bonus vitesse",
+        pointsLabel: "200 XP + Speed Bonus",
         badge: "rose",
       },
       {
         level: "All",
-        title: "Marathon Complet (24 Questions)",
-        desc: "Enchaînez l'intégralité des 24 questions Junior, Mid et DevOps Lead sous pression chronométrée.",
+        title: "Full 24-Question Marathon",
+        desc: "Complete all 24 Junior, Mid and DevOps Lead questions in a single timed benchmark.",
         timeLabel: "30-40s / question",
-        pointsLabel: "Score Maximum",
+        pointsLabel: "Maximum Score",
         badge: "blue",
       },
     ];
 
     return (
-      <div className="space-y-6 max-w-5xl mx-auto">
-        <div className="p-6 rounded-2xl border border-slate-800 bg-slate-900/90 backdrop-blur-xl shadow-saas-card">
-          <span className="px-2.5 py-0.5 rounded text-[10px] font-mono uppercase tracking-wider bg-blue-500/15 text-blue-400 border border-blue-500/30 font-bold">
-            Mode 3 &bull; Speed &amp; Mastery Timed Quiz
-          </span>
-          <h1 className="text-2xl font-extrabold text-slate-100 mt-2">
-            Quiz &amp; QCM Chronométrés par Niveau d&apos;Expertise
-          </h1>
-          <p className="text-xs text-slate-400 mt-1">
-            Sélectionnez votre palier. Chaque bonne réponse rapide multiplie votre score XP et alimente votre Streak. Chaque erreur est analysée dans le rapport Post-Mortem.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {tiers.map((t) => (
-            <div
-              key={t.level}
-              className="p-6 rounded-2xl border border-slate-800 bg-slate-900/90 hover:border-blue-500/50 transition-all flex flex-col justify-between space-y-5 shadow-saas-card"
-            >
-              <div className="space-y-2.5">
-                <div className="flex items-center justify-between">
-                  <Badge variant={t.badge}>{t.level}</Badge>
-                  <span className="text-xs font-mono text-slate-400 flex items-center gap-1">
-                    <Timer className="w-3.5 h-3.5 text-amber-400" />
-                    {t.timeLabel}
-                  </span>
-                </div>
-                <h2 className="text-lg font-bold text-slate-100">{t.title}</h2>
-                <p className="text-xs text-slate-400 leading-relaxed">{t.desc}</p>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {tiers.map((t) => (
+          <Card
+            key={t.level}
+            className="flex flex-col justify-between hover:border-primary/40 transition-colors"
+          >
+            <CardHeader className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Badge variant={t.badge}>{t.level}</Badge>
+                <Pill variant="outline" className="text-xs py-0.5">
+                  <Timer className="w-3 h-3 text-amber-400" />
+                  <span className="font-mono">{t.timeLabel}</span>
+                </Pill>
               </div>
+              <CardTitle className="text-lg">{t.title}</CardTitle>
+              <CardDescription className="text-xs leading-relaxed">
+                {t.desc}
+              </CardDescription>
+            </CardHeader>
 
-              <div className="flex items-center justify-between pt-4 border-t border-slate-800">
-                <span className="text-xs font-mono text-emerald-400 font-bold">
-                  {t.pointsLabel}
-                </span>
-                <Button
-                  onClick={() => {
-                    setSelectedTier(t.level);
-                    startQuiz(t.level);
-                  }}
-                  variant="primary"
-                  size="sm"
-                  icon={<Play className="w-3.5 h-3.5 fill-current" />}
-                >
-                  Lancer le Chrono
-                </Button>
-              </div>
-            </div>
-          ))}
-        </div>
+            <CardFooter className="flex items-center justify-between pt-4 border-t border-border">
+              <span className="text-xs font-mono text-emerald-400 font-semibold">
+                {t.pointsLabel}
+              </span>
+              <Button
+                onClick={() => {
+                  setSelectedTier(t.level);
+                  startQuiz(t.level);
+                }}
+                variant="default"
+                size="sm"
+                icon={<Play className="w-3.5 h-3.5" />}
+              >
+                Start Timer
+              </Button>
+            </CardFooter>
+          </Card>
+        ))}
       </div>
     );
   }
@@ -277,36 +281,42 @@ export const TimedQuizArena: React.FC<TimedQuizArenaProps> = ({
 
     return (
       <div className="max-w-4xl mx-auto space-y-6">
-        <div className="p-8 rounded-3xl border border-slate-800 bg-slate-900/90 text-center space-y-5 shadow-saas-card">
-          <div className="w-14 h-14 mx-auto rounded-2xl bg-blue-500/15 border border-blue-500/40 flex items-center justify-center text-blue-400 shadow-tech-glow">
-            <Trophy className="w-7 h-7" />
+        <Card className="p-8 text-center space-y-5">
+          <div className="w-12 h-12 mx-auto rounded-xl bg-secondary border border-border flex items-center justify-center text-emerald-400">
+            <Trophy className="w-6 h-6" />
           </div>
 
           <div>
-            <Badge variant={accuracy >= 80 ? "emerald" : "gold"}>
-              Palier : {selectedTier} &bull; Précision {accuracy}%
+            <Badge variant={accuracy >= 80 ? "emerald" : "amber"}>
+              Tier: {selectedTier} · Accuracy {accuracy}%
             </Badge>
-            <h2 className="text-2xl font-extrabold text-slate-100 mt-2">
-              Bilan du Sprint Chronométré
+            <h2 className="text-2xl font-bold text-foreground mt-2">
+              Timed Assessment Summary
             </h2>
           </div>
 
           <div className="grid grid-cols-3 gap-4 max-w-lg mx-auto font-mono">
-            <div className="p-4 rounded-xl bg-slate-950 border border-slate-800">
-              <span className="text-[10px] text-slate-500 uppercase block">Score Gagné</span>
-              <span className="text-xl font-extrabold text-emerald-400">
+            <div className="p-4 rounded-xl bg-secondary/50 border border-border">
+              <span className="text-[10px] text-muted-foreground block">
+                XP Earned
+              </span>
+              <span className="text-xl font-bold text-emerald-400">
                 +{sessionScore} XP
               </span>
             </div>
-            <div className="p-4 rounded-xl bg-slate-950 border border-slate-800">
-              <span className="text-[10px] text-slate-500 uppercase block">Bonnes Réponses</span>
-              <span className="text-xl font-extrabold text-blue-400">
+            <div className="p-4 rounded-xl bg-secondary/50 border border-border">
+              <span className="text-[10px] text-muted-foreground block">
+                Correct
+              </span>
+              <span className="text-xl font-bold text-sky-400">
                 {sessionCorrect}/{questionPool.length}
               </span>
             </div>
-            <div className="p-4 rounded-xl bg-slate-950 border border-slate-800">
-              <span className="text-[10px] text-slate-500 uppercase block">Erreurs</span>
-              <span className="text-xl font-extrabold text-[#f43f5e]">
+            <div className="p-4 rounded-xl bg-secondary/50 border border-border">
+              <span className="text-[10px] text-muted-foreground block">
+                Mistakes
+              </span>
+              <span className="text-xl font-bold text-rose-400">
                 {sessionMistakes.length}
               </span>
             </div>
@@ -321,11 +331,11 @@ export const TimedQuizArena: React.FC<TimedQuizArenaProps> = ({
                     sessionMistakes.map((m) => m.question)
                   )
                 }
-                variant="primary"
+                variant="default"
                 size="sm"
                 icon={<RotateCcw className="w-4 h-4" />}
               >
-                Re-tester uniquement mes {sessionMistakes.length} erreur(s)
+                Retry {sessionMistakes.length} missed question(s)
               </Button>
             )}
             <Button
@@ -333,60 +343,56 @@ export const TimedQuizArena: React.FC<TimedQuizArenaProps> = ({
               variant="secondary"
               size="sm"
             >
-              Recommencer ce niveau
+              Restart tier
             </Button>
             <Button
               onClick={() => setIsPlaying(false)}
               variant="outline"
               size="sm"
             >
-              Changer de niveau
+              Change tier
             </Button>
           </div>
-        </div>
+        </Card>
 
-        {/* Detailed Error Recap Section */}
         {sessionMistakes.length > 0 && (
           <div className="space-y-4">
-            <div className="flex items-center gap-2 text-sm font-bold text-[#f43f5e] font-mono uppercase tracking-wider">
+            <div className="flex items-center gap-2 text-sm font-semibold text-rose-400 font-mono">
               <AlertTriangle className="w-4 h-4" />
-              Récapitulatif Détaillé des Erreurs ({sessionMistakes.length})
+              Detailed Error Recap ({sessionMistakes.length})
             </div>
 
             {sessionMistakes.map((item, idx) => (
-              <div
-                key={idx}
-                className="p-5 rounded-2xl border border-rose-500/30 bg-slate-900/90 space-y-3 text-xs"
-              >
+              <Card key={idx} className="p-5 space-y-3 text-xs">
                 <div className="flex items-center justify-between">
                   <Badge variant="rose">{item.question.difficulty}</Badge>
-                  <span className="font-mono text-slate-400">
+                  <span className="font-mono text-muted-foreground">
                     {item.question.category}
                   </span>
                 </div>
-                <div className="text-sm font-bold text-slate-100">
+                <div className="text-sm font-semibold text-foreground">
                   {item.question.question}
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 font-mono">
-                  <div className="p-3 rounded-xl bg-rose-950/30 border border-rose-500/40 text-rose-300">
-                    <span className="text-[10px] uppercase block text-[#f43f5e] font-bold mb-1">
-                      ✗ Votre réponse :
+                  <div className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/30 text-rose-300">
+                    <span className="text-[10px] block text-rose-400 font-semibold mb-1">
+                      ✗ Your answer:
                     </span>
                     {item.chosenIndex === null
-                      ? "Temps écoulé (Timeout)"
+                      ? "Timeout"
                       : item.question.options[item.chosenIndex]}
                   </div>
-                  <div className="p-3 rounded-xl bg-emerald-950/30 border border-emerald-500/40 text-emerald-300">
-                    <span className="text-[10px] uppercase block text-[#10b981] font-bold mb-1">
-                      ✓ Réponse attendue :
+                  <div className="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-300">
+                    <span className="text-[10px] block text-emerald-400 font-semibold mb-1">
+                      ✓ Expected answer:
                     </span>
                     {item.question.options[item.question.correctIndex]}
                   </div>
                 </div>
-                <p className="text-slate-300 leading-relaxed pt-1">
-                  💡 <strong>Explication technique :</strong> {item.question.explanation}
+                <p className="text-muted-foreground leading-relaxed pt-1">
+                  {item.question.explanation}
                 </p>
-              </div>
+              </Card>
             ))}
           </div>
         )}
@@ -399,86 +405,74 @@ export const TimedQuizArena: React.FC<TimedQuizArenaProps> = ({
   );
 
   return (
-    <div className="max-w-3xl mx-auto space-y-5">
-      {/* Top Status Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-2xl border border-slate-800 bg-slate-900/90">
+    <div className="max-w-3xl mx-auto space-y-4">
+      {/* Top Status Bar with Kibo UI Status & Pill */}
+      <Card className="flex flex-wrap items-center justify-between gap-4 p-4">
         <div className="flex items-center gap-3">
-          <button
+          <Button
             onClick={() => setIsPlaying(false)}
-            className="text-xs font-mono text-slate-400 hover:text-slate-200 px-2.5 py-1 rounded-lg bg-slate-950 border border-slate-800"
+            variant="outline"
+            size="sm"
           >
-            ← Quitter
-          </button>
+            ← Exit
+          </Button>
           <Badge
             variant={
               activeQuestion.difficulty === "Junior"
                 ? "emerald"
                 : activeQuestion.difficulty === "Mid"
-                ? "gold"
+                ? "amber"
                 : "rose"
             }
           >
             {activeQuestion.difficulty}
           </Badge>
-          <span className="text-xs font-mono text-slate-400">
+          <span className="text-xs font-mono text-muted-foreground">
             {activeQuestion.category}
           </span>
         </div>
 
-        <div className="flex items-center gap-4 font-mono text-xs">
-          <span className="text-slate-400">
-            Question{" "}
-            <strong className="text-slate-100">
-              {currentIdx + 1}/{questionPool.length}
-            </strong>
-          </span>
-          <span className="text-emerald-400 font-bold">
-            Session : +{sessionScore} XP
-          </span>
-          <div
-            className={cn(
-              "px-3 py-1 rounded-lg border font-bold flex items-center gap-1.5",
-              timeLeft <= 7
-                ? "bg-rose-500/20 border-rose-500/50 text-[#f43f5e] animate-pulse"
-                : timeLeft <= 15
-                ? "bg-amber-500/20 border-amber-500/50 text-amber-300"
-                : "bg-blue-500/15 border-blue-500/40 text-blue-300"
-            )}
-          >
-            <Timer className="w-3.5 h-3.5" />
-            {timeLeft}s
-          </div>
-        </div>
-      </div>
+        <div className="flex items-center gap-3 font-mono text-xs">
+          <Pill variant="outline" className="py-0.5">
+            <PillStatus>
+              <PillIndicator variant="info" />
+              <span>
+                {currentIdx + 1}/{questionPool.length}
+              </span>
+            </PillStatus>
+            <span className="text-emerald-400 font-semibold">
+              +{sessionScore} XP
+            </span>
+          </Pill>
 
-      {/* Timer Bar */}
-      <div className="w-full h-2 rounded-full bg-slate-900 overflow-hidden border border-slate-800">
-        <div
-          className={cn(
-            "h-full transition-all duration-1000 rounded-full",
-            timeLeft <= 7
-              ? "bg-[#f43f5e]"
-              : timeLeft <= 15
-              ? "bg-[#f59e0b]"
-              : "bg-gradient-to-r from-[#3b82f6] to-[#10b981]"
-          )}
-          style={{ width: `${timerPercent}%` }}
-        />
-      </div>
+          <Status
+            status={
+              timeLeft <= 7
+                ? "offline"
+                : timeLeft <= 15
+                ? "degraded"
+                : "online"
+            }
+          >
+            <StatusIndicator />
+            <StatusLabel className="font-mono font-semibold text-foreground">
+              {timeLeft}s
+            </StatusLabel>
+          </Status>
+        </div>
+      </Card>
+
+      {/* shadcn/ui Progress Component */}
+      <Progress value={timerPercent} />
 
       {/* Question Card */}
-      <motion.div
-        key={activeQuestion.id}
-        initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="p-6 rounded-2xl border border-slate-800 bg-slate-900/90 space-y-5 shadow-saas-card"
-      >
-        <h2 className="text-base sm:text-lg font-bold text-slate-100 leading-relaxed">
+      <Card className="p-6 space-y-5">
+        <h2 className="text-base sm:text-lg font-semibold text-foreground leading-relaxed">
           {activeQuestion.question}
         </h2>
 
         {activeQuestion.codeSnippet && (
-          <pre className="p-3.5 rounded-xl bg-slate-950 border border-slate-800 font-mono text-xs text-blue-300 overflow-x-auto">
+          <pre className="p-3.5 rounded-lg bg-secondary/70 border border-border font-mono text-xs text-sky-300 overflow-x-auto">
             {activeQuestion.codeSnippet}
           </pre>
         )}
@@ -489,17 +483,17 @@ export const TimedQuizArena: React.FC<TimedQuizArenaProps> = ({
             const isSelected = selectedOpt === idx;
 
             let styleClass =
-              "border-slate-800 bg-slate-950/70 hover:bg-slate-800/70 hover:border-blue-500/40 text-slate-200";
+              "border-border bg-background/60 hover:bg-accent hover:text-accent-foreground";
 
             if (isLocked) {
               if (isCorrectOpt) {
                 styleClass =
-                  "border-emerald-500/70 bg-emerald-950/30 text-emerald-200 font-semibold";
+                  "border-emerald-500/60 bg-emerald-500/10 text-emerald-200 font-medium";
               } else if (isSelected && !isCorrectOpt) {
-                styleClass = "border-rose-500/70 bg-rose-950/30 text-rose-200";
+                styleClass = "border-rose-500/60 bg-rose-500/10 text-rose-200";
               } else {
                 styleClass =
-                  "border-slate-800/50 bg-slate-950/30 text-slate-500 opacity-60";
+                  "border-border/50 bg-background/30 text-muted-foreground opacity-60";
               }
             }
 
@@ -509,64 +503,59 @@ export const TimedQuizArena: React.FC<TimedQuizArenaProps> = ({
                 onClick={() => handleChooseOption(idx)}
                 disabled={isLocked}
                 className={cn(
-                  "w-full p-4 rounded-xl border text-left text-xs sm:text-sm transition-all flex items-start gap-3",
+                  "w-full p-4 rounded-xl border text-left text-xs sm:text-sm transition-colors flex items-start gap-3",
                   styleClass
                 )}
               >
-                <span className="w-6 h-6 rounded-lg bg-slate-900 border border-slate-800 font-mono text-xs font-bold flex items-center justify-center flex-shrink-0 text-blue-400">
+                <span className="w-6 h-6 rounded-md bg-secondary border border-border font-mono text-xs font-semibold flex items-center justify-center shrink-0 text-foreground">
                   {String.fromCharCode(65 + idx)}
                 </span>
                 <span className="flex-1 leading-relaxed">{opt}</span>
                 {isLocked && isCorrectOpt && (
-                  <CheckCircle2 className="w-5 h-5 text-[#10b981] flex-shrink-0" />
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
                 )}
                 {isLocked && isSelected && !isCorrectOpt && (
-                  <XCircle className="w-5 h-5 text-[#f43f5e] flex-shrink-0" />
+                  <XCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
                 )}
               </button>
             );
           })}
         </div>
 
-        {/* Immediate Feedback & Next Button */}
         {isLocked && (
-          <motion.div
-            initial={{ opacity: 0, y: 6 }}
-            animate={{ opacity: 1, y: 0 }}
+          <div
             className={cn(
               "p-4 rounded-xl border space-y-3 text-xs",
               selectedOpt === activeQuestion.correctIndex
-                ? "bg-emerald-950/25 border-emerald-500/40 text-emerald-200"
-                : "bg-rose-950/25 border-rose-500/40 text-rose-200"
+                ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-200"
+                : "bg-rose-500/10 border-rose-500/30 text-rose-200"
             )}
           >
-            <div className="flex items-center justify-between font-bold">
-              <span>
-                {selectedOpt === activeQuestion.correctIndex
-                  ? "✓ Excellente réponse !"
-                  : selectedOpt === -1
-                  ? "⏱ Temps écoulé ! Question enregistrée dans le Journal d'Erreurs."
-                  : "✗ Réponse incorrecte — enregistrée dans le Journal d'Erreurs."}
-              </span>
+            <div className="font-semibold">
+              {selectedOpt === activeQuestion.correctIndex
+                ? "✓ Correct answer"
+                : selectedOpt === -1
+                ? "Timeout — logged to Post-Mortem"
+                : "✗ Incorrect answer — logged to Post-Mortem"}
             </div>
-            <p className="text-slate-300 leading-relaxed">
+            <p className="text-muted-foreground leading-relaxed">
               {activeQuestion.explanation}
             </p>
             <div className="flex justify-end">
               <Button
                 onClick={handleNextQuestion}
-                variant="primary"
+                variant="default"
                 size="sm"
                 icon={<ArrowRight className="w-4 h-4" />}
               >
                 {currentIdx + 1 === questionPool.length
-                  ? "Voir le Bilan & Récapitulatif"
-                  : "Question Suivante"}
+                  ? "View Summary"
+                  : "Next Question"}
               </Button>
             </div>
-          </motion.div>
+          </div>
         )}
-      </motion.div>
+      </Card>
     </div>
   );
 };

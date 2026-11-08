@@ -1,8 +1,39 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { GitRepoState, GitCommit } from "@/types/git";
-import { motion } from "framer-motion";
+import {
+  MergeStyle,
+  TemplateName,
+  templateExtend,
+  toSvgPath,
+  Coordinate,
+} from "@gitgraph/core";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from "@/components/ui/Card";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/Tabs";
+import { Badge } from "@/components/ui/Badge";
+import { Button } from "@/components/ui/Button";
+import {
+  Pill,
+  PillIndicator,
+  PillStatus,
+  Status,
+  StatusIndicator,
+  StatusLabel,
+  Snippet,
+  SnippetHeader,
+  SnippetTabsList,
+  SnippetTabsTrigger,
+  SnippetTabsContent,
+  SnippetCopyButton,
+} from "@/components/ui/kibo-ui";
+import { GitCommitHorizontal, GitBranch, Tag as TagIcon, X } from "lucide-react";
 
 interface GitGraphCanvasProps {
   state: GitRepoState;
@@ -10,353 +41,504 @@ interface GitGraphCanvasProps {
   compact?: boolean;
 }
 
+const METRO_PALETTE = [
+  "#10b981", // emerald (main)
+  "#008fb5", // gitgraph metro cyan/blue
+  "#f1c109", // gitgraph metro amber
+  "#a855f7", // purple
+  "#f43f5e", // rose
+];
+
+const BLACKARROW_PALETTE = [
+  "#6963FF", // gitgraph blackarrow indigo
+  "#47E8D4", // gitgraph blackarrow teal
+  "#6BDB52", // gitgraph blackarrow green
+  "#E84BA5", // gitgraph blackarrow pink
+  "#FFA657", // gitgraph blackarrow orange
+];
+
 export const GitGraphCanvas: React.FC<GitGraphCanvasProps> = ({
   state,
   onSelectCommit,
   compact = false,
 }) => {
-  const [selectedCommitHash, setSelectedCommitHash] = useState<string | null>(null);
+  const [selectedCommitHash, setSelectedCommitHash] = useState<string | null>(
+    null
+  );
+  const [templateMode, setTemplateMode] = useState<"metro" | "blackarrow">(
+    "metro"
+  );
 
-  const allCommits = Object.values(state.commits);
-  const NODE_SPACING_X = compact ? 95 : 110;
-  const LANE_SPACING_Y = compact ? 64 : 72;
-  const PADDING_LEFT = 75;
-  const PADDING_TOP = 82;
+  // Authentic @gitgraph/core template configuration
+  const gitgraphTemplate = useMemo(() => {
+    return templateExtend(
+      templateMode === "metro"
+        ? TemplateName.Metro
+        : TemplateName.BlackArrow,
+      {
+        colors:
+          templateMode === "metro" ? METRO_PALETTE : BLACKARROW_PALETTE,
+        branch: {
+          lineWidth: templateMode === "metro" ? 7 : 4,
+          mergeStyle:
+            templateMode === "metro"
+              ? MergeStyle.Bezier
+              : MergeStyle.Straight,
+          spacing: compact ? 58 : 68,
+        },
+        commit: {
+          spacing: compact ? 96 : 114,
+          dot: {
+            size: templateMode === "metro" ? 13 : 14,
+            strokeWidth: templateMode === "metro" ? 3 : 4,
+          },
+        },
+      }
+    );
+  }, [templateMode, compact]);
 
-  const sortedCommits = [...allCommits];
-  const commitPositions: Record<string, { x: number; y: number; lane: number }> = {};
+  const sortedCommits = useMemo(() => Object.values(state.commits), [state.commits]);
 
-  sortedCommits.forEach((c, idx) => {
-    const x = PADDING_LEFT + idx * NODE_SPACING_X;
-    const y = PADDING_TOP + (c.lane || 0) * LANE_SPACING_Y;
-    commitPositions[c.hash] = { x, y, lane: c.lane || 0 };
-  });
+  const PADDING_LEFT = 76;
+  const PADDING_TOP = 84;
+  const NODE_SPACING_X = gitgraphTemplate.commit.spacing;
+  const LANE_SPACING_Y = gitgraphTemplate.branch.spacing;
 
-  const width = Math.max(640, PADDING_LEFT + sortedCommits.length * NODE_SPACING_X + 130);
+  const commitPositions = useMemo(() => {
+    const map: Record<string, { x: number; y: number; lane: number }> = {};
+    sortedCommits.forEach((c, idx) => {
+      const lane = c.lane || 0;
+      const x = PADDING_LEFT + idx * NODE_SPACING_X;
+      const y = PADDING_TOP + lane * LANE_SPACING_Y;
+      map[c.hash] = { x, y, lane };
+    });
+    return map;
+  }, [sortedCommits, NODE_SPACING_X, LANE_SPACING_Y]);
+
+  const width = Math.max(
+    680,
+    PADDING_LEFT + sortedCommits.length * NODE_SPACING_X + 140
+  );
   const maxLane = Math.max(0, ...sortedCommits.map((c) => c.lane || 0));
-  const height = PADDING_TOP + (maxLane + 1) * LANE_SPACING_Y + 60;
+  const height = PADDING_TOP + (maxLane + 1) * LANE_SPACING_Y + 64;
 
   const handleNodeClick = (commit: GitCommit) => {
     setSelectedCommitHash(commit.hash);
     if (onSelectCommit) onSelectCommit(commit);
   };
 
-  const selectedCommit = selectedCommitHash ? state.commits[selectedCommitHash] : null;
+  const selectedCommit = selectedCommitHash
+    ? state.commits[selectedCommitHash]
+    : null;
+
+  const isDetached = state.head.type === "detached";
+  const repoHealthStatus = isDetached
+    ? "offline"
+    : state.workingDirectory.length > 0
+    ? "degraded"
+    : "online";
 
   return (
     <div className="flex flex-col space-y-3">
-      <div className="relative rounded-2xl border border-slate-800 bg-slate-900/90 backdrop-blur-xl overflow-x-auto overflow-y-hidden shadow-saas-card">
-        {/* Subtle grid */}
-        <div
-          className="absolute inset-0 opacity-[0.08] pointer-events-none"
-          style={{
-            backgroundImage: "radial-gradient(#3b82f6 1px, transparent 1px)",
-            backgroundSize: "24px 24px",
-          }}
-        />
+      <Card className="overflow-hidden border-border bg-card/95 backdrop-blur">
+        <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-3 border-b border-border bg-muted/30 px-5 py-3.5 space-y-0">
+          <div className="flex flex-wrap items-center gap-2.5">
+            <CardTitle className="text-sm font-semibold flex items-center gap-2">
+              <GitCommitHorizontal className="h-4 w-4 text-emerald-400" />
+              <span>Gitgraph.js Commit DAG</span>
+            </CardTitle>
 
-        {/* Legend bar */}
-        <div className="flex flex-wrap items-center justify-between gap-2 px-4 py-2.5 border-b border-slate-800 bg-slate-950/60 text-[11px] font-mono">
-          <div className="flex items-center gap-4">
-            <span className="flex items-center gap-1.5 text-emerald-400">
-              <span className="w-2.5 h-2.5 rounded-full bg-[#10b981] inline-block" />
-              Commit SHA-1
-            </span>
-            <span className="flex items-center gap-1.5 text-amber-400">
-              <span className="w-2.5 h-2.5 rounded-full bg-[#f59e0b] inline-block" />
-              Pointeur HEAD
-            </span>
-            <span className="flex items-center gap-1.5 text-indigo-400">
-              <span className="w-2.5 h-2.5 rounded-full bg-[#6366f1] inline-block" />
-              Branche / Merge
-            </span>
-            {state.head.type === "detached" && (
-              <span className="flex items-center gap-1.5 text-[#f43f5e] font-bold animate-pulse">
-                <span className="w-2.5 h-2.5 rounded-full bg-[#f43f5e] inline-block" />
-                WARNING : HEAD DÉTACHÉE
+            {/* Kibo UI Status Component */}
+            <Status status={repoHealthStatus}>
+              <StatusIndicator />
+              <StatusLabel className="font-mono text-[11px] text-foreground">
+                {isDetached
+                  ? `HEAD detached at ${state.head.target.slice(0, 7)}`
+                  : `HEAD → ${state.head.target}`}
+              </StatusLabel>
+            </Status>
+
+            {/* Kibo UI Pill Component */}
+            <Pill variant="outline" className="hidden sm:inline-flex text-[11px] py-0.5">
+              <PillStatus>
+                <PillIndicator variant="info" />
+                <span>{Object.keys(state.branches).length} branches</span>
+              </PillStatus>
+              <span className="font-mono text-muted-foreground">
+                {sortedCommits.length} commits
               </span>
-            )}
+            </Pill>
           </div>
-          <span className="text-slate-400">Cliquez sur un commit pour inspecter son snapshot</span>
-        </div>
 
-        <svg width={width} height={height} className="relative z-10 select-none">
-          <defs>
-            <filter id="glowNode" x="-30%" y="-30%" width="160%" height="160%">
-              <feGaussianBlur stdDeviation="4" result="blur" />
-              <feComposite in="SourceGraphic" in2="blur" operator="over" />
-            </filter>
-          </defs>
+          {/* shadcn/ui Tabs to switch Gitgraph.js Template */}
+          <div className="flex items-center gap-2">
+            <Tabs
+              value={templateMode}
+              onValueChange={(v) =>
+                setTemplateMode(v as "metro" | "blackarrow")
+              }
+            >
+              <TabsList className="h-8">
+                <TabsTrigger value="metro" className="text-[11px] font-mono px-2.5">
+                  Metro (Bezier)
+                </TabsTrigger>
+                <TabsTrigger value="blackarrow" className="text-[11px] font-mono px-2.5">
+                  BlackArrow
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </div>
+        </CardHeader>
 
-          {/* Connecting edges */}
-          {sortedCommits.map((child) => {
-            const childPos = commitPositions[child.hash];
-            if (!childPos) return null;
+        <CardContent className="p-0 overflow-x-auto overflow-y-hidden relative">
+          {/* Subtle dot matrix background */}
+          <div
+            className="absolute inset-0 opacity-[0.12] pointer-events-none"
+            style={{
+              backgroundImage:
+                "radial-gradient(hsl(var(--muted-foreground)) 1px, transparent 1px)",
+              backgroundSize: "20px 20px",
+            }}
+          />
 
-            return child.parents.map((parentHash) => {
-              const parentPos = commitPositions[parentHash];
-              if (!parentPos) return null;
+          <svg
+            width={width}
+            height={height}
+            className="relative z-10 select-none block"
+          >
+            {/* Render paths using @gitgraph/core's official toSvgPath() */}
+            {sortedCommits.map((child) => {
+              const childPos = commitPositions[child.hash];
+              if (!childPos) return null;
 
-              const isStraight = parentPos.y === childPos.y;
-              const pathData = isStraight
-                ? `M ${parentPos.x} ${parentPos.y} L ${childPos.x} ${childPos.y}`
-                : `M ${parentPos.x} ${parentPos.y} C ${parentPos.x + 45} ${parentPos.y}, ${childPos.x - 45} ${childPos.y}, ${childPos.x} ${childPos.y}`;
+              return child.parents.map((parentHash, pIdx) => {
+                const parentPos = commitPositions[parentHash];
+                if (!parentPos) return null;
+
+                const coords: Coordinate[][] = [
+                  [
+                    { x: parentPos.x, y: parentPos.y },
+                    { x: childPos.x, y: childPos.y },
+                  ],
+                ];
+
+                const isBezier =
+                  gitgraphTemplate.branch.mergeStyle === MergeStyle.Bezier;
+                const d = toSvgPath(coords, isBezier, false);
+                const strokeColor =
+                  gitgraphTemplate.colors[
+                    childPos.lane % gitgraphTemplate.colors.length
+                  ];
+
+                return (
+                  <g key={`${parentHash}-${child.hash}-${pIdx}`}>
+                    <path
+                      d={d}
+                      fill="none"
+                      stroke={strokeColor}
+                      strokeWidth={gitgraphTemplate.branch.lineWidth}
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeDasharray={child.isMerge && pIdx > 0 ? "7 4" : undefined}
+                      className="transition-all duration-300"
+                    />
+                  </g>
+                );
+              });
+            })}
+
+            {/* Render Commit Dots, Gitgraph.js Branch Labels, and Pointed Tags */}
+            {sortedCommits.map((c) => {
+              const pos = commitPositions[c.hash];
+              if (!pos) return null;
+
+              const isHeadTarget =
+                state.head.type === "branch"
+                  ? state.branches[state.head.target]?.targetHash === c.hash
+                  : state.head.target === c.hash;
+
+              const isSelected = selectedCommitHash === c.hash;
+              const branchesHere = Object.values(state.branches).filter(
+                (b) => b.targetHash === c.hash
+              );
+              const tagsHere = Object.entries(state.tags).filter(
+                ([, hash]) => hash === c.hash
+              );
+
+              const laneColor =
+                isDetached && isHeadTarget
+                  ? "#f43f5e"
+                  : gitgraphTemplate.colors[
+                      pos.lane % gitgraphTemplate.colors.length
+                    ];
+
+              const dotRadius = gitgraphTemplate.commit.dot.size;
 
               return (
-                <path
-                  key={`${parentHash}-${child.hash}`}
-                  d={pathData}
-                  fill="none"
-                  stroke={child.isMerge ? "#6366f1" : "#10b981"}
-                  strokeWidth="2.5"
-                  strokeDasharray={child.isMerge ? "5 3" : undefined}
-                  className="transition-all duration-500 opacity-80"
-                />
-              );
-            });
-          })}
+                <g
+                  key={c.hash}
+                  className="cursor-pointer group"
+                  onClick={() => handleNodeClick(c)}
+                >
+                  {/* Selection / Active HEAD Halo */}
+                  {(isHeadTarget || isSelected) && (
+                    <circle
+                      cx={pos.x}
+                      cy={pos.y}
+                      r={dotRadius + 7}
+                      fill="none"
+                      stroke={isDetached && isHeadTarget ? "#f43f5e" : "#f59e0b"}
+                      strokeWidth="2"
+                      strokeDasharray={isSelected ? "4 2" : undefined}
+                    />
+                  )}
 
-          {/* Commit Nodes */}
-          {sortedCommits.map((c) => {
-            const pos = commitPositions[c.hash];
-            if (!pos) return null;
-
-            const isHeadTarget =
-              state.head.type === "branch"
-                ? state.branches[state.head.target]?.targetHash === c.hash
-                : state.head.target === c.hash;
-
-            const isSelected = selectedCommitHash === c.hash;
-            const branchesHere = Object.values(state.branches).filter(
-              (b) => b.targetHash === c.hash
-            );
-            const tagsHere = Object.entries(state.tags).filter(([, hash]) => hash === c.hash);
-
-            return (
-              <g
-                key={c.hash}
-                className="cursor-pointer group"
-                onClick={() => handleNodeClick(c)}
-              >
-                {(isHeadTarget || isSelected) && (
+                  {/* Gitgraph.js Commit Dot */}
                   <circle
                     cx={pos.x}
                     cy={pos.y}
-                    r="20"
-                    fill="none"
-                    stroke={
-                      state.head.type === "detached" && isHeadTarget
-                        ? "#f43f5e"
-                        : isHeadTarget
-                        ? "#f59e0b"
-                        : "#3b82f6"
+                    r={dotRadius}
+                    fill={
+                      templateMode === "metro" ? laneColor : "#09090b"
                     }
-                    strokeWidth="2.5"
-                    strokeOpacity="0.9"
-                    filter="url(#glowNode)"
+                    stroke={
+                      templateMode === "metro" ? "#09090b" : laneColor
+                    }
+                    strokeWidth={gitgraphTemplate.commit.dot.strokeWidth}
                   />
-                )}
 
-                <circle
-                  cx={pos.x}
-                  cy={pos.y}
-                  r={c.isMerge ? "14" : "12"}
-                  fill={
-                    state.head.type === "detached" && isHeadTarget
-                      ? "#4c0519"
-                      : c.isMerge
-                      ? "#1e1b4b"
-                      : "#064e3b"
-                  }
-                  stroke={
-                    state.head.type === "detached" && isHeadTarget
-                      ? "#f43f5e"
-                      : isHeadTarget
-                      ? "#f59e0b"
-                      : c.isMerge
-                      ? "#6366f1"
-                      : "#10b981"
-                  }
-                  strokeWidth="2.5"
-                />
+                  <circle
+                    cx={pos.x}
+                    cy={pos.y}
+                    r="4"
+                    fill="#fafafa"
+                  />
 
-                <circle
-                  cx={pos.x}
-                  cy={pos.y}
-                  r="4"
-                  fill={
-                    state.head.type === "detached" && isHeadTarget
-                      ? "#fb7185"
-                      : isHeadTarget
-                      ? "#fbbf24"
-                      : c.isMerge
-                      ? "#818cf8"
-                      : "#34d399"
-                  }
-                />
+                  {/* Commit Hash Abbrev */}
+                  <text
+                    x={pos.x}
+                    y={pos.y + dotRadius + 16}
+                    textAnchor="middle"
+                    fill="#fafafa"
+                    fontSize="11"
+                    fontFamily="monospace"
+                    fontWeight="600"
+                  >
+                    {c.shortHash}
+                  </text>
 
-                {/* Short SHA-1 */}
-                <text
-                  x={pos.x}
-                  y={pos.y + 27}
-                  textAnchor="middle"
-                  fill="#f1f5f9"
-                  fontSize="11"
-                  fontFamily="monospace"
-                  fontWeight="700"
-                >
-                  {c.shortHash}
-                </text>
+                  {/* Commit Subject */}
+                  <text
+                    x={pos.x}
+                    y={pos.y + dotRadius + 30}
+                    textAnchor="middle"
+                    fill="#a1a1aa"
+                    fontSize="10"
+                    fontFamily="sans-serif"
+                  >
+                    {c.message.length > 17
+                      ? c.message.slice(0, 16) + "…"
+                      : c.message}
+                  </text>
 
-                {/* Commit message preview */}
-                <text
-                  x={pos.x}
-                  y={pos.y + 41}
-                  textAnchor="middle"
-                  fill="#94a3b8"
-                  fontSize="9.5"
-                  fontFamily="sans-serif"
-                >
-                  {c.message.length > 16 ? c.message.slice(0, 15) + "…" : c.message}
-                </text>
+                  {/* Gitgraph.js Branch Labels */}
+                  <g transform={`translate(${pos.x}, ${pos.y - dotRadius - 10})`}>
+                    {branchesHere.map((branch, bIdx) => {
+                      const isHeadBranch =
+                        state.head.type === "branch" &&
+                        state.head.target === branch.name;
+                      const labelText = isHeadBranch
+                        ? `HEAD → ${branch.name}`
+                        : branch.name;
+                      const boxW = Math.max(74, labelText.length * 6.5 + 18);
+                      return (
+                        <g
+                          key={branch.name}
+                          transform={`translate(0, ${-bIdx * 23})`}
+                        >
+                          <rect
+                            x={-boxW / 2}
+                            y="-18"
+                            width={boxW}
+                            height="20"
+                            rx="6"
+                            fill="#18181b"
+                            stroke={isHeadBranch ? "#f59e0b" : laneColor}
+                            strokeWidth="1.5"
+                          />
+                          <text
+                            x="0"
+                            y="-5"
+                            textAnchor="middle"
+                            fill={isHeadBranch ? "#fbbf24" : "#fafafa"}
+                            fontSize="10"
+                            fontWeight="600"
+                            fontFamily="monospace"
+                          >
+                            {labelText}
+                          </text>
+                        </g>
+                      );
+                    })}
 
-                {/* Branch Badges & HEAD */}
-                <g transform={`translate(${pos.x}, ${pos.y - 24})`}>
-                  {branchesHere.map((branch, bIdx) => {
-                    const isHeadBranch =
-                      state.head.type === "branch" && state.head.target === branch.name;
-                    const labelText = isHeadBranch ? `HEAD → ${branch.name}` : branch.name;
-                    const boxW = Math.max(78, labelText.length * 6.5 + 16);
-                    return (
+                    {/* Detached HEAD Label */}
+                    {isDetached && state.head.target === c.hash && (
                       <g
-                        key={branch.name}
-                        transform={`translate(0, ${-bIdx * 22})`}
-                        className="select-none"
+                        transform={`translate(0, ${
+                          -branchesHere.length * 23
+                        })`}
                       >
                         <rect
-                          x={-boxW / 2}
-                          y="-16"
-                          width={boxW}
-                          height="18"
+                          x="-56"
+                          y="-18"
+                          width="112"
+                          height="20"
                           rx="6"
-                          fill="#0f172a"
-                          stroke={isHeadBranch ? "#f59e0b" : "#3b82f6"}
+                          fill="#4c0519"
+                          stroke="#f43f5e"
                           strokeWidth="1.5"
                         />
                         <text
                           x="0"
-                          y="-4"
+                          y="-5"
                           textAnchor="middle"
-                          fill={isHeadBranch ? "#fbbf24" : "#93c5fd"}
-                          fontSize="9.5"
-                          fontWeight="bold"
+                          fill="#fda4af"
+                          fontSize="10"
+                          fontWeight="600"
                           fontFamily="monospace"
                         >
-                          {labelText}
+                          HEAD (detached)
                         </text>
                       </g>
-                    );
-                  })}
+                    )}
 
-                  {/* Detached HEAD badge */}
-                  {state.head.type === "detached" && state.head.target === c.hash && (
-                    <g transform={`translate(0, ${-branchesHere.length * 22})`}>
-                      <rect
-                        x="-58"
-                        y="-16"
-                        width="116"
-                        height="18"
-                        rx="6"
-                        fill="#4c0519"
-                        stroke="#f43f5e"
-                        strokeWidth="1.5"
-                      />
-                      <text
-                        x="0"
-                        y="-4"
-                        textAnchor="middle"
-                        fill="#fda4af"
-                        fontSize="9.5"
-                        fontWeight="bold"
-                        fontFamily="monospace"
-                      >
-                        ⚡ HEAD (détachée)
-                      </text>
-                    </g>
-                  )}
+                    {/* Authentic Gitgraph.js Pointed SVG Tag (from @gitgraph/react Tag.tsx) */}
+                    {tagsHere.map(([tagName], tIdx) => {
+                      const tagYOffset =
+                        -(
+                          branchesHere.length +
+                          (isDetached && state.head.target === c.hash ? 1 : 0) +
+                          tIdx
+                        ) *
+                          23 -
+                        9;
+                      const tagW = Math.max(54, tagName.length * 6.5 + 22);
+                      const tagH = 18;
+                      const pointerW = 7;
+                      const r = 4;
+                      const halfW = tagW / 2;
+                      const halfH = tagH / 2;
+                      const tagPath = [
+                        `M ${-halfW},0`,
+                        `L ${-halfW + pointerW},${halfH}`,
+                        `H ${halfW - r}`,
+                        `Q ${halfW},${halfH} ${halfW},${halfH - r}`,
+                        `V ${-(halfH - r)}`,
+                        `Q ${halfW},${-halfH} ${halfW - r},${-halfH}`,
+                        `H ${-halfW + pointerW}`,
+                        `Z`,
+                      ].join(" ");
 
-                  {/* Tags */}
-                  {tagsHere.map(([tagName], tIdx) => (
-                    <g
-                      key={tagName}
-                      transform={`translate(0, ${
-                        -(branchesHere.length + (state.head.type === "detached" && state.head.target === c.hash ? 1 : 0) + tIdx) * 21
-                      })`}
-                    >
-                      <rect
-                        x="-34"
-                        y="-15"
-                        width="68"
-                        height="16"
-                        rx="5"
-                        fill="#064e3b"
-                        stroke="#10b981"
-                        strokeWidth="1.2"
-                      />
-                      <text
-                        x="0"
-                        y="-4"
-                        textAnchor="middle"
-                        fill="#a7f3d0"
-                        fontSize="9"
-                        fontWeight="bold"
-                        fontFamily="monospace"
-                      >
-                        🏷 {tagName}
-                      </text>
-                    </g>
-                  ))}
+                      return (
+                        <g
+                          key={tagName}
+                          transform={`translate(0, ${tagYOffset})`}
+                        >
+                          <path
+                            d={tagPath}
+                            fill="#18181b"
+                            stroke="#10b981"
+                            strokeWidth="1.25"
+                          />
+                          <text
+                            x={pointerW / 2}
+                            y="3.5"
+                            textAnchor="middle"
+                            fill="#34d399"
+                            fontSize="9.5"
+                            fontWeight="600"
+                            fontFamily="monospace"
+                          >
+                            {tagName}
+                          </text>
+                        </g>
+                      );
+                    })}
+                  </g>
                 </g>
-              </g>
-            );
-          })}
-        </svg>
-      </div>
+              );
+            })}
+          </svg>
+        </CardContent>
+      </Card>
 
-      {/* Commit Inspector */}
+      {/* Selected Commit Inspector with Kibo UI Snippet */}
       {selectedCommit && (
-        <motion.div
-          initial={{ opacity: 0, y: -6 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="p-3.5 rounded-xl border border-slate-800 bg-slate-900/90 flex flex-wrap items-center justify-between gap-4 text-xs"
-        >
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <span className="font-mono px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 font-bold">
-                SHA-1: {selectedCommit.hash}
-              </span>
-              <span className="text-slate-100 font-semibold">{selectedCommit.message}</span>
-            </div>
-            <div className="text-slate-400 flex items-center gap-3 text-[11px] font-mono">
-              <span>
-                Parents :{" "}
-                <strong className="text-blue-400">
+        <Card className="border-border bg-card p-4">
+          <div className="flex flex-wrap items-start justify-between gap-4 mb-3">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <Badge variant="emerald" className="font-mono">
+                  {selectedCommit.hash}
+                </Badge>
+                <span className="text-sm font-semibold text-foreground">
+                  {selectedCommit.message}
+                </span>
+              </div>
+              <CardDescription className="font-mono text-xs flex items-center gap-3">
+                <span className="flex items-center gap-1">
+                  <GitBranch className="h-3 w-3" />
+                  Parents:{" "}
                   {selectedCommit.parents.length > 0
-                    ? selectedCommit.parents.join(" + ")
-                    : "root-commit (aucun parent)"}
-                </strong>
-              </span>
-              <span>&bull;</span>
-              <span>Auteur : {selectedCommit.author}</span>
+                    ? selectedCommit.parents.join(", ")
+                    : "root-commit"}
+                </span>
+                <span>•</span>
+                <span className="flex items-center gap-1">
+                  <TagIcon className="h-3 w-3" />
+                  Author: {selectedCommit.author}
+                </span>
+              </CardDescription>
             </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7"
+              onClick={() => setSelectedCommitHash(null)}
+            >
+              <X className="h-4 w-4" />
+            </Button>
           </div>
-          <button
-            onClick={() => setSelectedCommitHash(null)}
-            className="px-2.5 py-1 text-slate-400 hover:text-slate-200 bg-slate-950 border border-slate-800 rounded-lg font-mono text-[11px]"
-          >
-            Fermer
-          </button>
-        </motion.div>
+
+          {/* Kibo UI Snippet for quick CLI checkout / cherry-pick */}
+          <Snippet defaultValue="checkout">
+            <SnippetHeader>
+              <SnippetTabsList className="h-7">
+                <SnippetTabsTrigger value="checkout">
+                  Checkout
+                </SnippetTabsTrigger>
+                <SnippetTabsTrigger value="cherry-pick">
+                  Cherry-pick
+                </SnippetTabsTrigger>
+                <SnippetTabsTrigger value="reset">
+                  Reset
+                </SnippetTabsTrigger>
+              </SnippetTabsList>
+              <SnippetCopyButton
+                value={`git checkout ${selectedCommit.shortHash}`}
+              />
+            </SnippetHeader>
+            <SnippetTabsContent value="checkout">
+              {`git checkout ${selectedCommit.shortHash}`}
+            </SnippetTabsContent>
+            <SnippetTabsContent value="cherry-pick">
+              {`git cherry-pick ${selectedCommit.shortHash}`}
+            </SnippetTabsContent>
+            <SnippetTabsContent value="reset">
+              {`git reset --hard ${selectedCommit.shortHash}`}
+            </SnippetTabsContent>
+          </Snippet>
+        </Card>
       )}
     </div>
   );

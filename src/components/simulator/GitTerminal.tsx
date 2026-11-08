@@ -1,8 +1,11 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import { Terminal as TerminalIcon, Send, RotateCcw, Sparkles } from "lucide-react";
+import { Terminal as TerminalIcon, Send, RotateCcw } from "lucide-react";
 import { CommandOutput } from "@/types/git";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
+import { Button } from "@/components/ui/Button";
+import { Status, StatusIndicator, StatusLabel } from "@/components/ui/kibo-ui";
 
 interface GitTerminalProps {
   history: CommandOutput[];
@@ -72,109 +75,104 @@ export const GitTerminal: React.FC<GitTerminalProps> = ({
   ];
 
   return (
-    <div className="rounded-2xl border border-slate-800 bg-slate-900/90 backdrop-blur-xl shadow-saas-card overflow-hidden flex flex-col font-mono text-xs">
-      {/* Terminal Title Bar */}
-      <div className="flex items-center justify-between px-4 py-2.5 bg-slate-950/80 border-b border-slate-800">
-        <div className="flex items-center gap-2">
-          <div className="flex gap-1.5">
-            <span className="w-3 h-3 rounded-full bg-[#f43f5e]/80 inline-block"></span>
-            <span className="w-3 h-3 rounded-full bg-[#f59e0b]/80 inline-block"></span>
-            <span className="w-3 h-3 rounded-full bg-[#10b981]/80 inline-block"></span>
-          </div>
-          <span className="text-slate-400 font-semibold flex items-center gap-1.5 ml-2 text-[11px]">
-            <TerminalIcon className="w-3.5 h-3.5 text-blue-400" />
-            Git Interactive Shell (bash)
-          </span>
+    <Card className="overflow-hidden flex flex-col font-mono text-xs border-border bg-card/95">
+      <CardHeader className="flex flex-row items-center justify-between px-4 py-2.5 bg-muted/40 border-b border-border space-y-0">
+        <div className="flex items-center gap-2.5">
+          <TerminalIcon className="w-4 h-4 text-sky-400" />
+          <CardTitle className="text-xs font-semibold font-sans">
+            Git Interactive Shell
+          </CardTitle>
+          <Status status="online" className="py-0 px-2">
+            <StatusIndicator />
+            <StatusLabel className="text-[10px] font-mono">git 2.47</StatusLabel>
+          </Status>
         </div>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={onClear}
-            className="text-slate-500 hover:text-slate-300 transition-colors flex items-center gap-1 text-[11px]"
-            title="Effacer l'historique du terminal"
-          >
-            <RotateCcw className="w-3 h-3" />
-            Clear
-          </button>
-        </div>
-      </div>
-
-      {/* Terminal Output Area */}
-      <div
-        ref={scrollRef}
-        className="p-4 flex-1 min-h-[210px] max-h-[300px] overflow-y-auto space-y-3 select-text"
-      >
-        <div className="text-slate-500 text-[11px] pb-1 border-b border-slate-800/80 flex items-center gap-1.5">
-          <Sparkles className="w-3 h-3 text-blue-400" />
-          Moteur Git v2.47 prêt. Tapez vos commandes ci-dessous ou cliquez sur les raccourcis rapides.
-        </div>
-
-        {history.map((item, idx) => (
-          <div key={idx} className="space-y-1">
-            <div className="flex items-center gap-2 text-slate-400">
-              <span className="text-[#10b981] font-bold">devops@lab:~/repo$</span>
-              <span className="text-slate-100 font-semibold">{item.command}</span>
-              <span className="text-[10px] text-slate-600 ml-auto">{item.timestamp}</span>
-            </div>
-            <pre
-              className={`p-2.5 rounded-lg text-[11px] whitespace-pre-wrap leading-relaxed ${
-                item.type === "error"
-                  ? "bg-rose-950/30 text-rose-300 border border-rose-500/30"
-                  : item.type === "warning"
-                  ? "bg-amber-950/30 text-amber-300 border border-amber-500/30"
-                  : item.type === "success"
-                  ? "bg-emerald-950/25 text-emerald-300 border border-emerald-500/25"
-                  : "bg-slate-950/70 text-slate-300 border border-slate-800"
-              }`}
-            >
-              {item.output}
-            </pre>
-          </div>
-        ))}
-      </div>
-
-      {/* Quick Suggestion Pills */}
-      <div className="px-3 py-2 bg-slate-950/50 border-t border-slate-800 flex items-center gap-1.5 overflow-x-auto scrollbar-none">
-        <span className="text-[10px] text-slate-500 uppercase tracking-wider flex-shrink-0 mr-1">
-          Raccourcis :
-        </span>
-        {quickCommands.map((q) => (
-          <button
-            key={q.cmd}
-            onClick={() => {
-              onExecute(q.cmd);
-              inputRef.current?.focus();
-            }}
-            className="flex-shrink-0 px-2.5 py-1 rounded-md bg-slate-800/80 hover:bg-blue-600/20 text-slate-300 hover:text-blue-300 border border-slate-700/70 hover:border-blue-500/40 text-[10.5px] transition-all"
-          >
-            {q.cmd}
-          </button>
-        ))}
-      </div>
-
-      {/* Terminal Input Form */}
-      <form
-        onSubmit={handleSubmit}
-        className="flex items-center gap-2 px-3.5 py-2.5 bg-slate-950 border-t border-slate-800"
-      >
-        <span className="text-[#3b82f6] font-bold flex-shrink-0">git&gt;</span>
-        <input
-          ref={inputRef}
-          type="text"
-          value={inputVal}
-          onChange={(e) => setInputVal(e.target.value)}
-          onKeyDown={handleKeyDown}
-          placeholder="Entrez une commande (ex: git commit -m 'feat: ...', git merge feature, git switch -c dev)..."
-          className="flex-1 bg-transparent text-slate-100 placeholder-slate-600 focus:outline-none text-xs"
-          autoFocus
-        />
-        <button
-          type="submit"
-          className="p-1.5 rounded-lg bg-[#3b82f6]/20 hover:bg-[#3b82f6]/30 text-blue-300 border border-blue-500/30 transition-colors"
-          title="Exécuter la commande"
+        <Button
+          onClick={onClear}
+          variant="ghost"
+          size="sm"
+          className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground"
         >
-          <Send className="w-3.5 h-3.5" />
-        </button>
-      </form>
-    </div>
+          <RotateCcw className="w-3 h-3 mr-1" />
+          Clear
+        </Button>
+      </CardHeader>
+
+      <CardContent className="p-0 flex flex-col">
+        <div
+          ref={scrollRef}
+          className="p-4 flex-1 min-h-[200px] max-h-[280px] overflow-y-auto space-y-3 bg-background/60 select-text"
+        >
+          {history.map((item, idx) => (
+            <div key={idx} className="space-y-1">
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <span className="text-emerald-400 font-bold">
+                  devops@lab:~/repo$
+                </span>
+                <span className="text-foreground font-semibold">
+                  {item.command}
+                </span>
+                <span className="text-[10px] text-muted-foreground ml-auto">
+                  {item.timestamp}
+                </span>
+              </div>
+              <pre
+                className={`p-2.5 rounded-lg text-[11px] whitespace-pre-wrap leading-relaxed border ${
+                  item.type === "error"
+                    ? "bg-rose-500/10 text-rose-300 border-rose-500/30"
+                    : item.type === "warning"
+                    ? "bg-amber-500/10 text-amber-300 border-amber-500/30"
+                    : item.type === "success"
+                    ? "bg-emerald-500/10 text-emerald-300 border-emerald-500/30"
+                    : "bg-secondary/50 text-foreground border-border"
+                }`}
+              >
+                {item.output}
+              </pre>
+            </div>
+          ))}
+        </div>
+
+        {/* Quick Command Pills */}
+        <div className="px-3 py-2 bg-muted/20 border-t border-border flex items-center gap-1.5 overflow-x-auto">
+          <span className="text-[10px] text-muted-foreground shrink-0 mr-1 font-sans">
+            Quick run:
+          </span>
+          {quickCommands.map((q) => (
+            <button
+              key={q.cmd}
+              type="button"
+              onClick={() => {
+                onExecute(q.cmd);
+                inputRef.current?.focus();
+              }}
+              className="shrink-0 px-2.5 py-1 rounded-md bg-secondary hover:bg-accent text-secondary-foreground border border-border text-[10.5px] transition-colors"
+            >
+              {q.cmd}
+            </button>
+          ))}
+        </div>
+
+        {/* Input Form */}
+        <form
+          onSubmit={handleSubmit}
+          className="flex items-center gap-2 px-3.5 py-2.5 bg-background border-t border-border"
+        >
+          <span className="text-emerald-400 font-bold shrink-0">git&gt;</span>
+          <input
+            ref={inputRef}
+            type="text"
+            value={inputVal}
+            onChange={(e) => setInputVal(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="Enter a git command (e.g. git commit -m 'feat: ...', git merge feature, git switch -c dev)..."
+            className="flex-1 bg-transparent text-foreground placeholder-muted-foreground focus:outline-none text-xs"
+          />
+          <Button type="submit" size="sm" className="h-7 px-2.5">
+            <Send className="w-3.5 h-3.5" />
+          </Button>
+        </form>
+      </CardContent>
+    </Card>
   );
 };

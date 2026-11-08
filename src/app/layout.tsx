@@ -2,22 +2,9 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "DevOps & Git Mastery Lab | Plateformes Collaboratives ISIMS",
+  title: "DevOps & Git Mastery Lab | shadcn/ui + Kibo UI + Gitgraph.js",
   description:
-    "Plateforme d'apprentissage et simulateur interactif complet pour le cours Plateformes Collaboratives - DevOps & Gestion de version Git (ISIMS). Graphe de commits en temps réel, exercices pratiques, pipelines GitLab CI et conteneurs Docker.",
-  keywords: [
-    "DevOps",
-    "Git",
-    "ISIMS",
-    "GitLab CI",
-    "Docker",
-    "Docker Compose",
-    "Microservices",
-    "Fast-forward",
-    "Rebase",
-    "3-way merge",
-    "CAMS",
-  ],
+    "Interactive Git commit graph simulator powered by Gitgraph.js (@gitgraph/core), Kibo UI and shadcn/ui.",
 };
 
 export default function RootLayout({
@@ -27,7 +14,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="fr" className="dark">
-      <body className="font-sans antialiased text-slate-100 min-h-screen flex flex-col bg-[#0b0f17]">
+      <body className="font-sans antialiased bg-background text-foreground min-h-screen flex flex-col">
         {children}
       </body>
     </html>
