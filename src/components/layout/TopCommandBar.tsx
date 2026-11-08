@@ -112,7 +112,7 @@ export const TopCommandBar: React.FC<TopCommandBarProps> = ({
 
   return (
     <header className="sticky top-0 z-40 w-full border-b border-border bg-background/85 backdrop-blur-xl">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-[1540px] mx-auto px-4 sm:px-6 lg:px-8">
         {/* Top Row: Brand + Cult UI Quick Command Modal + Telemetry Pills */}
         <div className="flex h-14 items-center justify-between gap-4">
           <div className="flex items-center gap-3">

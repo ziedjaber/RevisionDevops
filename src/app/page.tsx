@@ -281,7 +281,7 @@ export default function DrillChallengePlatform() {
       </AnimatePresence>
 
       {/* Main Content Area with Spring Mode Transitions */}
-      <main className="relative z-10 flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <main className="relative z-10 flex-1 max-w-[1540px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <WorkspaceOverviewHeader activeMode={activeMode} stats={stats} />
 
         <AnimatePresence mode="wait">

@@ -165,7 +165,7 @@ export const ProductionArena: React.FC<ProductionArenaProps> = ({
     diff === "Junior" ? "emerald" : diff === "Mid" ? "amber" : "rose";
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       {/* Filter Bar with Cult UI Spring Tabs */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-2">
@@ -179,7 +179,7 @@ export const ProductionArena: React.FC<ProductionArenaProps> = ({
             </span>
           </Pill>
           <span className="text-xs text-muted-foreground hidden sm:inline">
-            {activeScenario.category}
+            {activeScenario.category} — {activeScenario.title}
           </span>
         </div>
 
@@ -191,11 +191,22 @@ export const ProductionArena: React.FC<ProductionArenaProps> = ({
         />
       </div>
 
-      {/* Main Arena Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        {/* Left Column: Inspira UI 3D Tilt Scenario Cards & Mission Briefing */}
-        <div className="lg:col-span-4 space-y-4">
-          <div ref={scenarioListRef} className="space-y-2.5">
+      {/* 3-Column Ergonomic Layout:
+          1. Left (3 cols): Compact scrollable list of the 12 Incidents
+          2. Center (5 cols): Live Gitgraph.js Commit DAG + Interactive Git Console
+          3. Right (4 cols): Sticky Problem Briefing, Objectives & Step-by-Step Controls (at eye level!)
+      */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+        {/* Column 1 (Left): Scrollable Incident Selector */}
+        <div className="lg:col-span-3 space-y-2">
+          <div className="flex items-center justify-between px-1 text-xs font-mono text-muted-foreground">
+            <span>Incidents ({filteredScenarios.length})</span>
+            <span>{solvedArenaIds.length}/12 résolus</span>
+          </div>
+          <div
+            ref={scenarioListRef}
+            className="space-y-2 max-h-[670px] overflow-y-auto pr-1"
+          >
             {filteredScenarios.map((scen) => {
               const isSelected = scen.id === activeScenario.id;
               const isSolved = solvedArenaIds.includes(scen.id);
@@ -204,11 +215,11 @@ export const ProductionArena: React.FC<ProductionArenaProps> = ({
                   key={scen.id}
                   active={isSelected}
                   onClick={() => setSelectedId(scen.id)}
-                  className="cursor-pointer p-3.5"
+                  className="cursor-pointer p-3"
                 >
-                  <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-start justify-between gap-2">
                     <div className="space-y-1 min-w-0">
-                      <div className="flex items-center gap-2">
+                      <div className="flex flex-wrap items-center gap-1.5">
                         <span className="font-mono text-xs font-semibold text-foreground">
                           {scen.incidentCode}
                         </span>
@@ -217,18 +228,18 @@ export const ProductionArena: React.FC<ProductionArenaProps> = ({
                         >
                           {scen.difficulty}
                         </Badge>
-                        <span className="text-[11px] font-mono text-emerald-400">
+                        <span className="text-[10px] font-mono text-emerald-400">
                           +{scen.xpReward} XP
                         </span>
                       </div>
-                      <div className="text-xs font-semibold text-foreground truncate">
+                      <div className="text-xs font-semibold text-foreground line-clamp-1">
                         {scen.title}
                       </div>
-                      <div className="text-[11px] text-muted-foreground font-mono">
+                      <div className="text-[10px] text-muted-foreground font-mono truncate">
                         {scen.category}
                       </div>
                     </div>
-                    <div className="shrink-0 mt-1">
+                    <div className="shrink-0 mt-0.5">
                       {isSolved ? (
                         <CheckCircle2 className="w-4 h-4 text-emerald-400" />
                       ) : (
@@ -240,9 +251,52 @@ export const ProductionArena: React.FC<ProductionArenaProps> = ({
               );
             })}
           </div>
+        </div>
 
-          {/* Active Incident Card with Magic UI BorderBeam */}
-          <Card className="relative overflow-hidden">
+        {/* Column 2 (Center): Live Gitgraph.js Canvas + Interactive Git Terminal */}
+        <div className="lg:col-span-5 space-y-4">
+          {justSolvedBanner && (
+            <Card className="relative overflow-hidden border-emerald-500/50 bg-emerald-950/20 p-4">
+              <Meteors number={12} />
+              <BorderBeam
+                size={160}
+                duration={8}
+                colorFrom="#10b981"
+                colorTo="#38bdf8"
+              />
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-lg bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400">
+                  <Trophy className="w-5 h-5" />
+                </div>
+                <div>
+                  <div className="text-sm font-bold text-emerald-300 flex items-center gap-2">
+                    <span>
+                      Incident {activeScenario.incidentCode} Résolu !
+                    </span>
+                    <Badge variant="emerald">
+                      +{activeScenario.xpReward} XP
+                    </Badge>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    {activeScenario.postMortemTakeaway}
+                  </p>
+                </div>
+              </div>
+            </Card>
+          )}
+
+          <GitGraphCanvas state={gitState} compact />
+
+          <GitTerminal
+            history={terminalLogs}
+            onExecute={handleExecuteCommand}
+            onClear={() => setTerminalLogs([])}
+          />
+        </div>
+
+        {/* Column 3 (Right — Sticky at eye level): Problem Briefing Card */}
+        <div className="lg:col-span-4 lg:sticky lg:top-28">
+          <Card className="relative overflow-hidden shadow-xl">
             <BorderBeam
               size={180}
               duration={14}
@@ -398,47 +452,6 @@ export const ProductionArena: React.FC<ProductionArenaProps> = ({
               </div>
             </CardContent>
           </Card>
-        </div>
-
-        {/* Right Column: Live Gitgraph.js Canvas + Interactive Terminal */}
-        <div className="lg:col-span-8 space-y-4">
-          {justSolvedBanner && (
-            <Card className="relative overflow-hidden border-emerald-500/50 bg-emerald-950/20 p-4">
-              <Meteors number={12} />
-              <BorderBeam
-                size={160}
-                duration={8}
-                colorFrom="#10b981"
-                colorTo="#38bdf8"
-              />
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-lg bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400">
-                  <Trophy className="w-5 h-5" />
-                </div>
-                <div>
-                  <div className="text-sm font-bold text-emerald-300 flex items-center gap-2">
-                    <span>
-                      Incident {activeScenario.incidentCode} Résolu !
-                    </span>
-                    <Badge variant="emerald">
-                      +{activeScenario.xpReward} XP
-                    </Badge>
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    {activeScenario.postMortemTakeaway}
-                  </p>
-                </div>
-              </div>
-            </Card>
-          )}
-
-          <GitGraphCanvas state={gitState} />
-
-          <GitTerminal
-            history={terminalLogs}
-            onExecute={handleExecuteCommand}
-            onClear={() => setTerminalLogs([])}
-          />
         </div>
       </div>
     </div>
