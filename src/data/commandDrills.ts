@@ -77,16 +77,16 @@ export const commandDrillsData: CommandDrill[] = [
   {
     id: "drill-jr-6",
     difficulty: "Junior",
-    category: "GitLab CI & Docker",
+    category: "Git Remotes & CI/CD",
     xpReward: 60,
-    scenarioContext: "Port Mapping Docker (Slide S203)",
-    prompt: "Lancez un conteneur à partir de l'image 'image-name' en mappant le port local 8000 de l'hôte vers le port 80 exposé par le conteneur.",
-    acceptedPatterns: ["^docker\\s+run\\s+(-d\\s+)?-p\\s+8000:80\\s+image-name$"],
-    canonicalCommand: "docker run -p 8000:80 image-name",
-    simulatedOutput: "c48f92a10d... Conteneur démarré : localhost:8000 -> container:80",
+    scenarioContext: "Clonage d'un dépôt distant (Slide S113)",
+    prompt: "Clonez le dépôt distant situé à l'URL 'https://github.com/org/app.git' sur votre machine locale.",
+    acceptedPatterns: ["^git\\s+clone\\s+https://github\\.com/org/app\\.git$"],
+    canonicalCommand: "git clone https://github.com/org/app.git",
+    simulatedOutput: "Cloning into 'app'...\nremote: Enumerating objects: 42, done.\nReceiving objects: 100% (42/42), done.",
     explanation:
-      "L'indicateur '-p portExterne:portInterne' (Slide S203) redirige le trafic de localhost:8000 vers le port 80 du conteneur isolé.",
-    hint: "Syntaxe : docker run -p <hote>:<conteneur> <image>",
+      "'git clone <url>' (Slide S113) copie intégralement le dépôt distant, crée automatiquement le remote 'origin' et extrait la branche par défaut.",
+    hint: "Syntaxe : git clone <url>",
   },
 
   // ==================== MID ====================
@@ -179,16 +179,16 @@ export const commandDrillsData: CommandDrill[] = [
   {
     id: "drill-mid-7",
     difficulty: "Mid",
-    category: "GitLab CI & Docker",
+    category: "Git Zones & Diff",
     xpReward: 90,
-    scenarioContext: "Orchestration Multi-Conteneurs (Slide S208)",
-    prompt: "Démarrez l'ensemble de la pile d'application définie dans 'docker-compose.yml' en une seule commande.",
-    acceptedPatterns: ["^docker(-compose|\\s+compose)\\s+up(\\s+-d)?$"],
-    canonicalCommand: "docker-compose up -d",
-    simulatedOutput: "Creating network \"app_default\" with the default driver\nCreating app_db_1  ... done\nCreating app_web_1 ... done",
+    scenarioContext: "Comparaison Working Directory ↔ HEAD (Slide S68)",
+    prompt: "Affichez toutes les différences entre votre répertoire de travail actuel (Working Directory) et le dernier commit HEAD (incluant les changements stagés et non-stagés).",
+    acceptedPatterns: ["^git\\s+diff\\s+HEAD$"],
+    canonicalCommand: "git diff HEAD",
+    simulatedOutput: "diff --git a/server.ts b/server.ts\nindex 745a6ef..9f8e7d6 100644\n+ app.listen(8080);",
     explanation:
-      "'docker-compose up' (ou 'docker compose up -d', Slide S208) crée les réseaux, volumes et démarre tous les services déclarés.",
-    hint: "Utilisez 'docker-compose up'.",
+      "Selon le schéma de la Slide S68, 'git diff HEAD' compare directement le Working Directory avec le commit pointé par HEAD.",
+    hint: "Passez le pointeur courant en argument à 'git diff'.",
   },
 
   // ==================== DEVOPS LEAD ====================
@@ -251,7 +251,7 @@ export const commandDrillsData: CommandDrill[] = [
   {
     id: "drill-lead-5",
     difficulty: "DevOps Lead",
-    category: "Branches & HEAD",
+    category: "Git Remotes & CI/CD",
     xpReward: 120,
     scenarioContext: "Ajout d'un dépôt distant d'équipe (Slide S116)",
     prompt: "Ajoutez un nouveau dépôt distant nommé 'teamone' pointant vers l'URL 'git://git.team1.ourcompany.com'.",
@@ -261,5 +261,35 @@ export const commandDrillsData: CommandDrill[] = [
     explanation:
       "'git remote add <alias> <url>' (Slide S116) permet d'enregistrer un serveur distant supplémentaire pour collaborer entre plusieurs sous-équipes.",
     hint: "Syntaxe : git remote add <nom> <url>",
+  },
+  {
+    id: "drill-lead-6",
+    difficulty: "DevOps Lead",
+    category: "Git Remotes & CI/CD",
+    xpReward: 130,
+    scenarioContext: "Publication d'une branche locale vers origin (Slide S119)",
+    prompt: "Envoyez (publiez) votre branche locale 'serverfix' vers le dépôt distant 'origin'.",
+    acceptedPatterns: ["^git\\s+push\\s+(-u\\s+)?origin\\s+serverfix(\\s*:serverfix)?$"],
+    canonicalCommand: "git push origin serverfix",
+    simulatedOutput: "To https://github.com/org/repo.git\n * [new branch]      serverfix -> serverfix",
+    explanation:
+      "'git push origin serverfix' (Slide S119) téléverse les commits de votre branche locale 'serverfix' pour créer ou mettre à jour la branche distante correspondante sur 'origin'.",
+    hint: "Syntaxe : git push <remote> <branche>",
+  },
+  {
+    id: "drill-lead-7",
+    difficulty: "DevOps Lead",
+    category: "Git Remotes & CI/CD",
+    xpReward: 130,
+    scenarioContext: "Suppression d'une branche distante obsolète (Slide S125)",
+    prompt: "Supprimez la branche distante 'serverfix' directement sur le serveur distant 'origin' après sa fusion.",
+    acceptedPatterns: [
+      "^git\\s+push\\s+origin\\s+(--delete\\s+serverfix|:serverfix)$",
+    ],
+    canonicalCommand: "git push origin --delete serverfix",
+    simulatedOutput: "To https://github.com/org/repo.git\n - [deleted]         serverfix",
+    explanation:
+      "'git push origin --delete serverfix' (Slide S125) demande au serveur distant 'origin' de supprimer la référence de branche distante devenue inutile.",
+    hint: "Utilisez 'git push origin --delete <branche>'.",
   },
 ];

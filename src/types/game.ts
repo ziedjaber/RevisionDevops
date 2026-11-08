@@ -67,7 +67,7 @@ export interface ArenaScenario {
 export interface CommandDrill {
   id: string;
   difficulty: DifficultyLevel;
-  category: "Git Zones & Diff" | "Branches & HEAD" | "Merge & Rebase" | "Reset & Rescue" | "GitLab CI & Docker";
+  category: "Git Zones & Diff" | "Branches & HEAD" | "Merge & Rebase" | "Reset & Rescue" | "Git Remotes & CI/CD";
   xpReward: number;
   scenarioContext: string;
   prompt: string;

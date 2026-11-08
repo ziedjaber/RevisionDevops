@@ -78,14 +78,14 @@ export const arenaScenarios: ArenaScenario[] = [
     xpReward: 150,
     incidentCode: "INC-102",
     incidentBrief:
-      "Sarah a terminé la conteneurisation Docker sur la branche 'feature/docker' (6e99c2b). Aucun commit n'a été fait sur 'main' depuis son départ. L'architecte exige une intégration Fast-Forward suivie de la suppression de la branche temporaire.",
+      "Sarah a terminé la pipeline d'intégration continue sur la branche 'feature/gitlab-ci' (6e99c2b). Aucun commit n'a été fait sur 'main' depuis son départ. L'architecte exige une intégration Fast-Forward suivie de la suppression de la branche temporaire.",
     missionGoal:
-      "Faire avancer 'main' sur 'feature/docker' par Fast-Forward, poser le tag 'v1.1' et supprimer la branche 'feature/docker'.",
+      "Faire avancer 'main' sur 'feature/gitlab-ci' par Fast-Forward, poser le tag 'v1.1' et supprimer la branche 'feature/gitlab-ci'.",
     initialPreset: "arena-fastforward",
     objectives: [
       {
         id: "obj-1",
-        label: "Fusionner 'feature/docker' dans 'main' par Fast-Forward (main pointe sur 6e99c2b)",
+        label: "Fusionner 'feature/gitlab-ci' dans 'main' par Fast-Forward (main pointe sur 6e99c2b)",
         check: (state) => state.branches["main"]?.targetHash === "6e99c2b",
       },
       {
@@ -95,32 +95,32 @@ export const arenaScenarios: ArenaScenario[] = [
       },
       {
         id: "obj-3",
-        label: "Supprimer la branche fusionnée 'feature/docker'",
-        check: (state) => !state.branches["feature/docker"],
+        label: "Supprimer la branche fusionnée 'feature/gitlab-ci'",
+        check: (state) => !state.branches["feature/gitlab-ci"],
       },
     ],
     hints: [
-      "Vous êtes déjà sur 'main'. Lancez : git merge feature/docker",
+      "Vous êtes déjà sur 'main'. Lancez : git merge feature/gitlab-ci",
       "Posez le tag avec : git tag v1.1",
-      "Supprimez l'étiquette de branche obsolète avec : git branch -d feature/docker",
+      "Supprimez l'étiquette de branche obsolète avec : git branch -d feature/gitlab-ci",
     ],
     solutionSteps: [
       {
         stepNumber: 1,
-        command: "git merge feature/docker",
+        command: "git merge feature/gitlab-ci",
         description:
-          "Comme 'main' (a8c912b) est un ancêtre direct de 'feature/docker' (6e99c2b), Git effectue un Fast-Forward sans créer de commit de merge.",
+          "Comme 'main' (a8c912b) est un ancêtre direct de 'feature/gitlab-ci' (6e99c2b), Git effectue un Fast-Forward sans créer de commit de merge.",
       },
       {
         stepNumber: 2,
         command: "git tag v1.1",
-        description: "Marque officiellement la version 1.1 conteneurisée.",
+        description: "Marque officiellement la version 1.1 avec pipeline CI.",
       },
       {
         stepNumber: 3,
-        command: "git branch -d feature/docker",
+        command: "git branch -d feature/gitlab-ci",
         description:
-          "Supprime le pointeur de branche 'feature/docker' devenu inutile (les commits restent dans 'main').",
+          "Supprime le pointeur de branche 'feature/gitlab-ci' devenu inutile (les commits restent dans 'main').",
       },
     ],
     postMortemTakeaway:

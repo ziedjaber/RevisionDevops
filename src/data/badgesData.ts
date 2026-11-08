@@ -68,7 +68,7 @@ export const badgesData: BadgeItem[] = [
   {
     id: "drill-overlord",
     name: "Terminal Overlord",
-    description: "Valider 16 Command Drills couvrant Git, GitLab CI et Docker.",
+    description: "Valider 16 Command Drills couvrant Git et les workflows distants.",
     iconName: "Cpu",
     tier: "diamond",
     conditionText: "16 Command Drills validés",

@@ -202,7 +202,7 @@ export const TimedQuizArena: React.FC<TimedQuizArenaProps> = ({
       {
         level: "Junior",
         title: "Junior DevOps Tier",
-        desc: "The 3 Git local zones, SHA-1 snapshots, pull vs fetch, CAMS principles, REST Stateless and Containers vs VMs.",
+        desc: "The 3 Git local zones, SHA-1 snapshots, pull vs fetch, CAMS principles, REST Stateless and DVCS vs CVCS.",
         timeLabel: "30s / question",
         pointsLabel: "100 XP + Speed Bonus",
         badge: "emerald",
@@ -210,7 +210,7 @@ export const TimedQuizArena: React.FC<TimedQuizArenaProps> = ({
       {
         level: "Mid",
         title: "Mid Engineer Tier",
-        desc: "Diff --staged, Fast-Forward vs 3-Way Merge, Reset modes, GitFlow vs Trunk-Based, GitLab CI and Bridge networks.",
+        desc: "Diff --staged, Fast-Forward vs 3-Way Merge, Reset modes, Commit --amend, GitFlow vs Trunk-Based and GitLab CI.",
         timeLabel: "35s / question",
         pointsLabel: "150 XP + Speed Bonus",
         badge: "amber",
@@ -218,7 +218,7 @@ export const TimedQuizArena: React.FC<TimedQuizArenaProps> = ({
       {
         level: "DevOps Lead",
         title: "DevOps Lead Tier",
-        desc: "Rebase --onto, Detached HEAD traps, Linux kernel workflows, macvlan/overlay drivers, DNS Service Discovery and cache layers.",
+        desc: "Rebase --onto, Detached HEAD traps, Linux kernel workflows, Cherry-Pick internals, Rebase Golden Rule and GitLab Runners.",
         timeLabel: "40s / question",
         pointsLabel: "200 XP + Speed Bonus",
         badge: "rose",

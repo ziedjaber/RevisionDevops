@@ -43,7 +43,7 @@ const MODE_META: Record<
   },
   drills: {
     tag: "Mode 2 · CLI Drills",
-    announcement: "20 interactive Git, GitLab CI & Docker terminal drills",
+    announcement: "20 interactive Git & DevOps terminal drills",
     title: "Interactive CLI Command Drills",
     subtitle:
       "Type the exact command for each scenario to build your streak multiplier and unlock badges.",

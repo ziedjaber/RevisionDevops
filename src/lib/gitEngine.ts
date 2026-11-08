@@ -113,15 +113,15 @@ export function getPresetState(preset: string): GitRepoState {
     const commits: Record<string, GitCommit> = {
       [c1]: { hash: c1, shortHash: c1, parents: [], message: "chore: initial setup", author: "DevOps", timestamp: "3j", lane: 0 },
       [c2]: { hash: c2, shortHash: c2, parents: [c1], message: "feat: core CRUD endpoints", author: "DevOps", timestamp: "2j", lane: 0 },
-      [f1]: { hash: f1, shortHash: f1, parents: [c2], message: "feat: add Dockerfile alpine", author: "Sarah", timestamp: "1j", lane: 1 },
-      [f2]: { hash: f2, shortHash: f2, parents: [f1], message: "feat: add docker-compose.yml", author: "Sarah", timestamp: "4h", lane: 1 },
+      [f1]: { hash: f1, shortHash: f1, parents: [c2], message: "feat: add .gitlab-ci.yml stages", author: "Sarah", timestamp: "1j", lane: 1 },
+      [f2]: { hash: f2, shortHash: f2, parents: [f1], message: "feat: configure GitLab Runner", author: "Sarah", timestamp: "4h", lane: 1 },
     };
 
     return {
       commits,
       branches: {
         main: { name: "main", targetHash: c2, isCurrent: true, color: "#10B981" },
-        "feature/docker": { name: "feature/docker", targetHash: f2, isCurrent: false, color: "#06B6D4" },
+        "feature/gitlab-ci": { name: "feature/gitlab-ci", targetHash: f2, isCurrent: false, color: "#06B6D4" },
       },
       tags: { "v1.0": c2 },
       head: { type: "branch", target: "main" },
