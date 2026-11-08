@@ -71,6 +71,9 @@ const config: Config = {
         "border-beam": "border-beam calc(var(--duration)*1s) infinite linear",
         aurora: "aurora 18s ease-in-out infinite alternate",
         shimmer: "shimmer 3s linear infinite",
+        marquee: "marquee 28s linear infinite",
+        meteor: "meteor 5s linear infinite",
+        "pulse-ring": "pulse-ring 2.2s cubic-bezier(0.24, 0, 0.38, 1) infinite",
       },
       keyframes: {
         "border-beam": {
@@ -92,6 +95,33 @@ const config: Config = {
         shimmer: {
           "0%": { backgroundPosition: "200% 0" },
           "100%": { backgroundPosition: "-200% 0" },
+        },
+        marquee: {
+          "0%": { transform: "translateX(0%)" },
+          "100%": { transform: "translateX(-50%)" },
+        },
+        meteor: {
+          "0%": {
+            transform: "rotate(215deg) translateX(0)",
+            opacity: "1",
+          },
+          "70%": {
+            opacity: "1",
+          },
+          "100%": {
+            transform: "rotate(215deg) translateX(-420px)",
+            opacity: "0",
+          },
+        },
+        "pulse-ring": {
+          "0%": {
+            transform: "scale(0.9)",
+            opacity: "0.8",
+          },
+          "100%": {
+            transform: "scale(1.9)",
+            opacity: "0",
+          },
         },
       },
     },

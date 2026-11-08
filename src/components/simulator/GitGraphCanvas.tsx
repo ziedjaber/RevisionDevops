@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { GitRepoState, GitCommit } from "@/types/git";
 import {
   MergeStyle,
@@ -33,6 +34,7 @@ import {
   SnippetTabsContent,
   SnippetCopyButton,
 } from "@/components/ui/kibo-ui";
+import { BorderBeam } from "@/components/ui/magic-ui";
 import { GitCommitHorizontal, GitBranch, Tag as TagIcon, X } from "lucide-react";
 
 interface GitGraphCanvasProps {
@@ -97,7 +99,10 @@ export const GitGraphCanvas: React.FC<GitGraphCanvasProps> = ({
     );
   }, [templateMode, compact]);
 
-  const sortedCommits = useMemo(() => Object.values(state.commits), [state.commits]);
+  const sortedCommits = useMemo(
+    () => Object.values(state.commits),
+    [state.commits]
+  );
 
   const PADDING_LEFT = 76;
   const PADDING_TOP = 84;
@@ -140,15 +145,21 @@ export const GitGraphCanvas: React.FC<GitGraphCanvasProps> = ({
 
   return (
     <div className="flex flex-col space-y-3">
-      <Card className="overflow-hidden border-border bg-card/95 backdrop-blur">
+      <Card className="relative overflow-hidden border-border bg-card/95 backdrop-blur">
+        <BorderBeam
+          size={220}
+          duration={15}
+          colorFrom="#10b981"
+          colorTo="#6366f1"
+        />
+
         <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-3 border-b border-border bg-muted/30 px-5 py-3.5 space-y-0">
           <div className="flex flex-wrap items-center gap-2.5">
             <CardTitle className="text-sm font-semibold flex items-center gap-2">
               <GitCommitHorizontal className="h-4 w-4 text-emerald-400" />
-              <span>Gitgraph.js Commit DAG</span>
+              <span>Gitgraph.js Live Animated Commit DAG</span>
             </CardTitle>
 
-            {/* Kibo UI Status Component */}
             <Status status={repoHealthStatus}>
               <StatusIndicator />
               <StatusLabel className="font-mono text-[11px] text-foreground">
@@ -158,10 +169,12 @@ export const GitGraphCanvas: React.FC<GitGraphCanvasProps> = ({
               </StatusLabel>
             </Status>
 
-            {/* Kibo UI Pill Component */}
-            <Pill variant="outline" className="hidden sm:inline-flex text-[11px] py-0.5">
+            <Pill
+              variant="outline"
+              className="hidden sm:inline-flex text-[11px] py-0.5"
+            >
               <PillStatus>
-                <PillIndicator variant="info" />
+                <PillIndicator variant="info" pulse />
                 <span>{Object.keys(state.branches).length} branches</span>
               </PillStatus>
               <span className="font-mono text-muted-foreground">
@@ -170,7 +183,6 @@ export const GitGraphCanvas: React.FC<GitGraphCanvasProps> = ({
             </Pill>
           </div>
 
-          {/* shadcn/ui Tabs to switch Gitgraph.js Template */}
           <div className="flex items-center gap-2">
             <Tabs
               value={templateMode}
@@ -179,10 +191,16 @@ export const GitGraphCanvas: React.FC<GitGraphCanvasProps> = ({
               }
             >
               <TabsList className="h-8">
-                <TabsTrigger value="metro" className="text-[11px] font-mono px-2.5">
+                <TabsTrigger
+                  value="metro"
+                  className="text-[11px] font-mono px-2.5"
+                >
                   Metro (Bezier)
                 </TabsTrigger>
-                <TabsTrigger value="blackarrow" className="text-[11px] font-mono px-2.5">
+                <TabsTrigger
+                  value="blackarrow"
+                  className="text-[11px] font-mono px-2.5"
+                >
                   BlackArrow
                 </TabsTrigger>
               </TabsList>
@@ -206,7 +224,7 @@ export const GitGraphCanvas: React.FC<GitGraphCanvasProps> = ({
             height={height}
             className="relative z-10 select-none block"
           >
-            {/* Render paths using @gitgraph/core's official toSvgPath() */}
+            {/* Render animated paths using @gitgraph/core's official toSvgPath() + Framer Motion */}
             {sortedCommits.map((child) => {
               const childPos = commitPositions[child.hash];
               if (!childPos) return null;
@@ -232,23 +250,47 @@ export const GitGraphCanvas: React.FC<GitGraphCanvasProps> = ({
 
                 return (
                   <g key={`${parentHash}-${child.hash}-${pIdx}`}>
-                    <path
+                    {/* Base branch curve with pathLength draw animation */}
+                    <motion.path
                       d={d}
                       fill="none"
                       stroke={strokeColor}
                       strokeWidth={gitgraphTemplate.branch.lineWidth}
                       strokeLinecap="round"
                       strokeLinejoin="round"
-                      strokeDasharray={child.isMerge && pIdx > 0 ? "7 4" : undefined}
-                      className="transition-all duration-300"
+                      strokeDasharray={
+                        child.isMerge && pIdx > 0 ? "7 4" : undefined
+                      }
+                      initial={{ pathLength: 0, opacity: 0 }}
+                      animate={{ pathLength: 1, opacity: 0.9 }}
+                      transition={{
+                        duration: 0.55,
+                        ease: "easeOut",
+                      }}
+                    />
+                    {/* Animated light pulse flowing along the commit graph edge */}
+                    <motion.path
+                      d={d}
+                      fill="none"
+                      stroke="#ffffff"
+                      strokeWidth={2}
+                      strokeLinecap="round"
+                      strokeDasharray="6 42"
+                      initial={{ strokeDashoffset: 48, opacity: 0 }}
+                      animate={{ strokeDashoffset: 0, opacity: 0.35 }}
+                      transition={{
+                        duration: 2.2,
+                        repeat: Infinity,
+                        ease: "linear",
+                      }}
                     />
                   </g>
                 );
               });
             })}
 
-            {/* Render Commit Dots, Gitgraph.js Branch Labels, and Pointed Tags */}
-            {sortedCommits.map((c) => {
+            {/* Render Animated Commit Dots, Gitgraph.js Branch Labels, and Pointed Tags */}
+            {sortedCommits.map((c, commitIndex) => {
               const pos = commitPositions[c.hash];
               if (!pos) return null;
 
@@ -275,19 +317,51 @@ export const GitGraphCanvas: React.FC<GitGraphCanvasProps> = ({
               const dotRadius = gitgraphTemplate.commit.dot.size;
 
               return (
-                <g
+                <motion.g
                   key={c.hash}
+                  initial={{ opacity: 0, scale: 0.4 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{
+                    type: "spring",
+                    stiffness: 360,
+                    damping: 22,
+                    delay: commitIndex * 0.04,
+                  }}
+                  style={{ originX: `${pos.x}px`, originY: `${pos.y}px` }}
                   className="cursor-pointer group"
                   onClick={() => handleNodeClick(c)}
                 >
+                  {/* Concentric Sonar Pulse Ring on Active HEAD */}
+                  {isHeadTarget && (
+                    <motion.circle
+                      cx={pos.x}
+                      cy={pos.y}
+                      fill="none"
+                      stroke={isDetached ? "#f43f5e" : "#f59e0b"}
+                      strokeWidth="2"
+                      initial={{ r: dotRadius + 3, opacity: 0.85 }}
+                      animate={{
+                        r: [dotRadius + 3, dotRadius + 16],
+                        opacity: [0.8, 0],
+                      }}
+                      transition={{
+                        duration: 1.9,
+                        repeat: Infinity,
+                        ease: "easeOut",
+                      }}
+                    />
+                  )}
+
                   {/* Selection / Active HEAD Halo */}
                   {(isHeadTarget || isSelected) && (
                     <circle
                       cx={pos.x}
                       cy={pos.y}
-                      r={dotRadius + 7}
+                      r={dotRadius + 6}
                       fill="none"
-                      stroke={isDetached && isHeadTarget ? "#f43f5e" : "#f59e0b"}
+                      stroke={
+                        isDetached && isHeadTarget ? "#f43f5e" : "#f59e0b"
+                      }
                       strokeWidth="2"
                       strokeDasharray={isSelected ? "4 2" : undefined}
                     />
@@ -298,21 +372,13 @@ export const GitGraphCanvas: React.FC<GitGraphCanvasProps> = ({
                     cx={pos.x}
                     cy={pos.y}
                     r={dotRadius}
-                    fill={
-                      templateMode === "metro" ? laneColor : "#09090b"
-                    }
-                    stroke={
-                      templateMode === "metro" ? "#09090b" : laneColor
-                    }
+                    fill={templateMode === "metro" ? laneColor : "#09090b"}
+                    stroke={templateMode === "metro" ? "#09090b" : laneColor}
                     strokeWidth={gitgraphTemplate.commit.dot.strokeWidth}
+                    className="transition-transform duration-200"
                   />
 
-                  <circle
-                    cx={pos.x}
-                    cy={pos.y}
-                    r="4"
-                    fill="#fafafa"
-                  />
+                  <circle cx={pos.x} cy={pos.y} r="4" fill="#fafafa" />
 
                   {/* Commit Hash Abbrev */}
                   <text
@@ -342,7 +408,11 @@ export const GitGraphCanvas: React.FC<GitGraphCanvasProps> = ({
                   </text>
 
                   {/* Gitgraph.js Branch Labels */}
-                  <g transform={`translate(${pos.x}, ${pos.y - dotRadius - 10})`}>
+                  <g
+                    transform={`translate(${pos.x}, ${
+                      pos.y - dotRadius - 10
+                    })`}
+                  >
                     {branchesHere.map((branch, bIdx) => {
                       const isHeadBranch =
                         state.head.type === "branch" &&
@@ -352,9 +422,15 @@ export const GitGraphCanvas: React.FC<GitGraphCanvasProps> = ({
                         : branch.name;
                       const boxW = Math.max(74, labelText.length * 6.5 + 18);
                       return (
-                        <g
+                        <motion.g
                           key={branch.name}
-                          transform={`translate(0, ${-bIdx * 23})`}
+                          initial={{ y: -bIdx * 23 - 8, opacity: 0 }}
+                          animate={{ y: -bIdx * 23, opacity: 1 }}
+                          transition={{
+                            type: "spring",
+                            stiffness: 380,
+                            damping: 24,
+                          }}
                         >
                           <rect
                             x={-boxW / 2}
@@ -377,13 +453,15 @@ export const GitGraphCanvas: React.FC<GitGraphCanvasProps> = ({
                           >
                             {labelText}
                           </text>
-                        </g>
+                        </motion.g>
                       );
                     })}
 
                     {/* Detached HEAD Label */}
                     {isDetached && state.head.target === c.hash && (
-                      <g
+                      <motion.g
+                        initial={{ scale: 0.8, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
                         transform={`translate(0, ${
                           -branchesHere.length * 23
                         })`}
@@ -409,10 +487,10 @@ export const GitGraphCanvas: React.FC<GitGraphCanvasProps> = ({
                         >
                           HEAD (detached)
                         </text>
-                      </g>
+                      </motion.g>
                     )}
 
-                    {/* Authentic Gitgraph.js Pointed SVG Tag (from @gitgraph/react Tag.tsx) */}
+                    {/* Authentic Gitgraph.js Pointed SVG Tag */}
                     {tagsHere.map(([tagName], tIdx) => {
                       const tagYOffset =
                         -(
@@ -440,8 +518,10 @@ export const GitGraphCanvas: React.FC<GitGraphCanvasProps> = ({
                       ].join(" ");
 
                       return (
-                        <g
+                        <motion.g
                           key={tagName}
+                          initial={{ scale: 0.7, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1 }}
                           transform={`translate(0, ${tagYOffset})`}
                         >
                           <path
@@ -461,85 +541,94 @@ export const GitGraphCanvas: React.FC<GitGraphCanvasProps> = ({
                           >
                             {tagName}
                           </text>
-                        </g>
+                        </motion.g>
                       );
                     })}
                   </g>
-                </g>
+                </motion.g>
               );
             })}
           </svg>
         </CardContent>
       </Card>
 
-      {/* Selected Commit Inspector with Kibo UI Snippet */}
-      {selectedCommit && (
-        <Card className="border-border bg-card p-4">
-          <div className="flex flex-wrap items-start justify-between gap-4 mb-3">
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <Badge variant="emerald" className="font-mono">
-                  {selectedCommit.hash}
-                </Badge>
-                <span className="text-sm font-semibold text-foreground">
-                  {selectedCommit.message}
-                </span>
+      {/* Selected Commit Inspector with Spring Drawer Animation */}
+      <AnimatePresence>
+        {selectedCommit && (
+          <motion.div
+            key={selectedCommit.hash}
+            initial={{ opacity: 0, y: -10, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -8, scale: 0.98 }}
+            transition={{ type: "spring", stiffness: 380, damping: 28 }}
+          >
+            <Card className="border-border bg-card p-4">
+              <div className="flex flex-wrap items-start justify-between gap-4 mb-3">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <Badge variant="emerald" className="font-mono">
+                      {selectedCommit.hash}
+                    </Badge>
+                    <span className="text-sm font-semibold text-foreground">
+                      {selectedCommit.message}
+                    </span>
+                  </div>
+                  <CardDescription className="font-mono text-xs flex items-center gap-3">
+                    <span className="flex items-center gap-1">
+                      <GitBranch className="h-3 w-3" />
+                      Parents:{" "}
+                      {selectedCommit.parents.length > 0
+                        ? selectedCommit.parents.join(", ")
+                        : "root-commit"}
+                    </span>
+                    <span>•</span>
+                    <span className="flex items-center gap-1">
+                      <TagIcon className="h-3 w-3" />
+                      Author: {selectedCommit.author}
+                    </span>
+                  </CardDescription>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7"
+                  onClick={() => setSelectedCommitHash(null)}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
               </div>
-              <CardDescription className="font-mono text-xs flex items-center gap-3">
-                <span className="flex items-center gap-1">
-                  <GitBranch className="h-3 w-3" />
-                  Parents:{" "}
-                  {selectedCommit.parents.length > 0
-                    ? selectedCommit.parents.join(", ")
-                    : "root-commit"}
-                </span>
-                <span>•</span>
-                <span className="flex items-center gap-1">
-                  <TagIcon className="h-3 w-3" />
-                  Author: {selectedCommit.author}
-                </span>
-              </CardDescription>
-            </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-7 w-7"
-              onClick={() => setSelectedCommitHash(null)}
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
 
-          {/* Kibo UI Snippet for quick CLI checkout / cherry-pick */}
-          <Snippet defaultValue="checkout">
-            <SnippetHeader>
-              <SnippetTabsList className="h-7">
-                <SnippetTabsTrigger value="checkout">
-                  Checkout
-                </SnippetTabsTrigger>
-                <SnippetTabsTrigger value="cherry-pick">
-                  Cherry-pick
-                </SnippetTabsTrigger>
-                <SnippetTabsTrigger value="reset">
-                  Reset
-                </SnippetTabsTrigger>
-              </SnippetTabsList>
-              <SnippetCopyButton
-                value={`git checkout ${selectedCommit.shortHash}`}
-              />
-            </SnippetHeader>
-            <SnippetTabsContent value="checkout">
-              {`git checkout ${selectedCommit.shortHash}`}
-            </SnippetTabsContent>
-            <SnippetTabsContent value="cherry-pick">
-              {`git cherry-pick ${selectedCommit.shortHash}`}
-            </SnippetTabsContent>
-            <SnippetTabsContent value="reset">
-              {`git reset --hard ${selectedCommit.shortHash}`}
-            </SnippetTabsContent>
-          </Snippet>
-        </Card>
-      )}
+              <Snippet defaultValue="checkout">
+                <SnippetHeader>
+                  <SnippetTabsList className="h-7">
+                    <SnippetTabsTrigger value="checkout">
+                      Checkout
+                    </SnippetTabsTrigger>
+                    <SnippetTabsTrigger value="cherry-pick">
+                      Cherry-pick
+                    </SnippetTabsTrigger>
+                    <SnippetTabsTrigger value="reset">
+                      Reset
+                    </SnippetTabsTrigger>
+                  </SnippetTabsList>
+                  <SnippetCopyButton
+                    value={`git checkout ${selectedCommit.shortHash}`}
+                  />
+                </SnippetHeader>
+                <SnippetTabsContent value="checkout">
+                  {`git checkout ${selectedCommit.shortHash}`}
+                </SnippetTabsContent>
+                <SnippetTabsContent value="cherry-pick">
+                  {`git cherry-pick ${selectedCommit.shortHash}`}
+                </SnippetTabsContent>
+                <SnippetTabsContent value="reset">
+                  {`git reset --hard ${selectedCommit.shortHash}`}
+                </SnippetTabsContent>
+              </Snippet>
+            </Card>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

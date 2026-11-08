@@ -1,7 +1,9 @@
 "use client";
 
 import React, { useId, useEffect, useState } from "react";
+import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { Check, Terminal } from "lucide-react";
 
 /**
  * Magic UI — DotPattern
@@ -123,7 +125,7 @@ export function NumberTicker({
     const start = displayVal;
     const end = value;
     if (start === end) return;
-    const duration = 420;
+    const duration = 450;
     const startTime = performance.now();
 
     let rafId: number;
@@ -141,18 +143,24 @@ export function NumberTicker({
   }, [value]);
 
   return (
-    <span className={cn("tabular-nums tracking-tight", className)}>
+    <motion.span
+      key={value}
+      initial={{ scale: 1.18, color: "#34d399" }}
+      animate={{ scale: 1, color: "inherit" }}
+      transition={{ type: "spring", stiffness: 360, damping: 20 }}
+      className={cn("inline-block tabular-nums tracking-tight", className)}
+    >
       {displayVal.toLocaleString("en-US")}
-    </span>
+    </motion.span>
   );
 }
 
 /**
  * Magic UI — Meteors
- * Subtle diagonal shooting light trails inside cards and victory banners.
+ * Authentic diagonal shooting meteors with glowing head and trailing tail.
  */
 export function Meteors({
-  number = 10,
+  number = 12,
   className,
 }: {
   number?: number;
@@ -160,9 +168,10 @@ export function Meteors({
 }) {
   const meteors = Array.from({ length: number }, (_, idx) => ({
     id: idx,
-    left: `${Math.floor((idx / number) * 100)}%`,
-    delay: `${(idx * 0.65).toFixed(2)}s`,
-    duration: `${3 + (idx % 4)}s`,
+    top: `${(idx * 7) % 45}%`,
+    left: `${10 + ((idx * 17) % 85)}%`,
+    delay: `${(idx * 0.45).toFixed(2)}s`,
+    duration: `${3.2 + (idx % 4) * 0.9}s`,
   }));
 
   return (
@@ -177,12 +186,12 @@ export function Meteors({
         <span
           key={m.id}
           style={{
-            top: "-10%",
+            top: m.top,
             left: m.left,
             animationDelay: m.delay,
             animationDuration: m.duration,
           }}
-          className="absolute h-0.5 w-16 rotate-[35deg] bg-gradient-to-r from-indigo-400/60 via-emerald-400/20 to-transparent opacity-40 animate-pulse"
+          className="absolute h-0.5 w-0.5 rotate-[215deg] animate-meteor rounded-full bg-indigo-300 shadow-[0_0_0_1px_#ffffff10] before:absolute before:top-1/2 before:h-[1px] before:w-[56px] before:-translate-y-1/2 before:bg-gradient-to-r before:from-indigo-400/80 before:via-emerald-400/30 before:to-transparent before:content-['']"
         />
       ))}
     </div>
@@ -191,7 +200,7 @@ export function Meteors({
 
 /**
  * Magic UI — CommandMarquee
- * Subtle horizontal live ticker of Git / DevOps commands.
+ * Infinite scrolling horizontal marquee of clickable Git commands with pause-on-hover.
  */
 export function CommandMarquee({
   items,
@@ -200,21 +209,44 @@ export function CommandMarquee({
   items: string[];
   className?: string;
 }) {
+  const [copied, setCopied] = useState<string | null>(null);
+  const doubled = [...items, ...items];
+
+  const handleCopy = (raw: string) => {
+    const clean = raw.replace(/^\$\s*/, "");
+    navigator.clipboard.writeText(clean);
+    setCopied(raw);
+    setTimeout(() => setCopied(null), 1200);
+  };
+
   return (
     <div
       className={cn(
-        "relative flex w-full overflow-x-auto no-scrollbar items-center gap-2 py-1",
+        "group relative flex w-full overflow-hidden py-1 [mask-image:linear-gradient(to_right,transparent,white_8%,white_92%,transparent)]",
         className
       )}
     >
-      {items.map((item, idx) => (
-        <span
-          key={idx}
-          className="shrink-0 rounded-md border border-slate-800/80 bg-slate-900/60 px-2 py-0.5 font-mono text-[10px] text-slate-400"
-        >
-          {item}
-        </span>
-      ))}
+      <div className="flex w-max animate-marquee items-center gap-2.5 group-hover:[animation-play-state:paused]">
+        {doubled.map((item, idx) => {
+          const isCopied = copied === item;
+          return (
+            <button
+              key={`${item}-${idx}`}
+              type="button"
+              onClick={() => handleCopy(item)}
+              className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-slate-800/80 bg-slate-900/70 px-2.5 py-1 font-mono text-[10.5px] text-slate-300 transition-all hover:border-indigo-500/50 hover:bg-indigo-500/10 hover:text-white"
+              title="Cliquer pour copier la commande"
+            >
+              {isCopied ? (
+                <Check className="h-3 w-3 text-emerald-400" />
+              ) : (
+                <Terminal className="h-3 w-3 text-indigo-400/80" />
+              )}
+              <span>{item}</span>
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }

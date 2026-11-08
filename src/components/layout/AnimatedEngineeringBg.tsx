@@ -17,6 +17,8 @@ import {
   DecryptedText,
   ShinyText,
   SpotlightDivider,
+  ClickSparkOverlay,
+  CursorSpotlight,
 } from "@/components/ui/react-bits";
 import { FlipWords } from "@/components/ui/inspira-ui";
 import { ArrowUpRight } from "lucide-react";
@@ -40,18 +42,22 @@ const MARQUEE_COMMANDS = [
  */
 export function AnimatedEngineeringBg() {
   return (
-    <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
-      <AuroraTerminalBg intensity="subtle" />
-      <DotPattern
-        width={24}
-        height={24}
-        cx={1}
-        cy={1}
-        cr={1}
-        className="[mask-image:radial-gradient(900px_circle_at_center,white,transparent)] opacity-45"
-      />
-      <CommitNetworkParticles className="opacity-75" />
-    </div>
+    <>
+      <ClickSparkOverlay />
+      <CursorSpotlight />
+      <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
+        <AuroraTerminalBg intensity="subtle" />
+        <DotPattern
+          width={24}
+          height={24}
+          cx={1}
+          cy={1}
+          cr={1}
+          className="[mask-image:radial-gradient(900px_circle_at_center,white,transparent)] opacity-45"
+        />
+        <CommitNetworkParticles className="opacity-75" />
+      </div>
+    </>
   );
 }
 

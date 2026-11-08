@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
+import { motion } from "framer-motion";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { commandDrillsData } from "@/data/commandDrills";
 import { CommandDrill, DifficultyLevel, MistakeRecord } from "@/types/game";
@@ -273,9 +274,17 @@ export const CommandDrillMode: React.FC<CommandDrillModeProps> = ({
                 </h2>
               </div>
 
-              {/* Interactive Input Box with Inspira UI GlowButton */}
+              {/* Interactive Input Box with Inspira UI GlowButton + Shake/Pop Animation */}
               <form onSubmit={handleSubmit} className="space-y-3">
-                <div
+                <motion.div
+                  animate={
+                    status === "wrong"
+                      ? { x: [-9, 9, -7, 7, -4, 4, 0] }
+                      : status === "correct"
+                      ? { scale: [1, 1.015, 1] }
+                      : { x: 0, scale: 1 }
+                  }
+                  transition={{ duration: 0.35 }}
                   className={cn(
                     "flex items-center gap-3 px-4 py-3 rounded-xl bg-background/90 border font-mono text-sm transition-colors",
                     status === "correct"
@@ -321,7 +330,7 @@ export const CommandDrillMode: React.FC<CommandDrillModeProps> = ({
                       </>
                     )}
                   </GlowButton>
-                </div>
+                </motion.div>
               </form>
 
               {/* Helper Actions */}

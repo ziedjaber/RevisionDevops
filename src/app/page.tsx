@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { TopCommandBar } from "@/components/layout/TopCommandBar";
 import {
   AnimatedEngineeringBg,
@@ -236,77 +237,102 @@ export default function DrillChallengePlatform() {
         stats={stats}
       />
 
-      {/* Badge Unlocked Toast with Magic UI Meteors + BorderBeam */}
-      {recentBadgeName && (
-        <Card className="fixed bottom-16 right-6 z-50 overflow-hidden p-4 border-emerald-500/50 bg-card shadow-lg flex items-center gap-3.5">
-          <Meteors number={6} />
-          <BorderBeam
-            size={120}
-            duration={6}
-            colorFrom="#10b981"
-            colorTo="#f59e0b"
-          />
-          <div className="w-9 h-9 rounded-lg bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
-            <Award className="w-4 h-4" />
-          </div>
-          <div>
-            <span className="text-[10px] font-mono text-emerald-400 font-semibold block">
-              Nouveau Badge Débloqué !
-            </span>
-            <span className="text-sm font-bold text-foreground">
-              {recentBadgeName}
-            </span>
-          </div>
-          <Button
-            onClick={() => setRecentBadgeName(null)}
-            variant="ghost"
-            size="icon"
-            className="h-7 w-7 ml-2"
+      {/* Badge Unlocked Toast with Magic UI Meteors + BorderBeam + Spring Animation */}
+      <AnimatePresence>
+        {recentBadgeName && (
+          <motion.div
+            key={recentBadgeName}
+            initial={{ opacity: 0, y: 30, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.92 }}
+            transition={{ type: "spring", stiffness: 400, damping: 25 }}
+            className="fixed bottom-16 right-6 z-50"
           >
-            <X className="w-4 h-4" />
-          </Button>
-        </Card>
-      )}
+            <Card className="relative overflow-hidden p-4 border-emerald-500/50 bg-card shadow-lg flex items-center gap-3.5">
+              <Meteors number={6} />
+              <BorderBeam
+                size={120}
+                duration={6}
+                colorFrom="#10b981"
+                colorTo="#f59e0b"
+              />
+              <div className="w-9 h-9 rounded-lg bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+                <Award className="w-4 h-4" />
+              </div>
+              <div>
+                <span className="text-[10px] font-mono text-emerald-400 font-semibold block">
+                  Nouveau Badge Débloqué !
+                </span>
+                <span className="text-sm font-bold text-foreground">
+                  {recentBadgeName}
+                </span>
+              </div>
+              <Button
+                onClick={() => setRecentBadgeName(null)}
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7 ml-2"
+              >
+                <X className="w-4 h-4" />
+              </Button>
+            </Card>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-      {/* Main Content Area */}
+      {/* Main Content Area with Spring Mode Transitions */}
       <main className="relative z-10 flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <WorkspaceOverviewHeader activeMode={activeMode} stats={stats} />
 
-        {activeMode === "arena" && (
-          <ProductionArena
-            solvedArenaIds={stats.solvedArenaIds}
-            onSolveScenario={handleSolveArenaScenario}
-            onRecordMistake={handleRecordMistake}
-          />
-        )}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={activeMode}
+            initial={{ opacity: 0, y: 12, filter: "blur(4px)" }}
+            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+            exit={{ opacity: 0, y: -10, filter: "blur(4px)" }}
+            transition={{
+              type: "spring",
+              stiffness: 340,
+              damping: 30,
+            }}
+          >
+            {activeMode === "arena" && (
+              <ProductionArena
+                solvedArenaIds={stats.solvedArenaIds}
+                onSolveScenario={handleSolveArenaScenario}
+                onRecordMistake={handleRecordMistake}
+              />
+            )}
 
-        {activeMode === "drills" && (
-          <CommandDrillMode
-            completedDrillIds={stats.completedDrillIds}
-            currentStreak={stats.currentStreak}
-            onPassDrill={handlePassDrill}
-            onFailDrill={handleRecordMistake}
-          />
-        )}
+            {activeMode === "drills" && (
+              <CommandDrillMode
+                completedDrillIds={stats.completedDrillIds}
+                currentStreak={stats.currentStreak}
+                onPassDrill={handlePassDrill}
+                onFailDrill={handleRecordMistake}
+              />
+            )}
 
-        {activeMode === "quiz" && (
-          <TimedQuizArena
-            currentStreak={stats.currentStreak}
-            onCorrectAnswer={handleQuizCorrect}
-            onWrongAnswer={handleRecordMistake}
-            onCompletePerfectQuiz={handleCompletePerfectQuiz}
-          />
-        )}
+            {activeMode === "quiz" && (
+              <TimedQuizArena
+                currentStreak={stats.currentStreak}
+                onCorrectAnswer={handleQuizCorrect}
+                onWrongAnswer={handleRecordMistake}
+                onCompletePerfectQuiz={handleCompletePerfectQuiz}
+              />
+            )}
 
-        {activeMode === "sandbox" && <GitSimulator />}
+            {activeMode === "sandbox" && <GitSimulator />}
 
-        {activeMode === "profile" && (
-          <SkillBadgesAndErrors
-            stats={stats}
-            onClearMistakes={handleClearMistakes}
-            onRemoveMistake={handleRemoveMistake}
-          />
-        )}
+            {activeMode === "profile" && (
+              <SkillBadgesAndErrors
+                stats={stats}
+                onClearMistakes={handleClearMistakes}
+                onRemoveMistake={handleRemoveMistake}
+              />
+            )}
+          </motion.div>
+        </AnimatePresence>
       </main>
 
       {/* Cult UI Floating Keyboard Dock */}
