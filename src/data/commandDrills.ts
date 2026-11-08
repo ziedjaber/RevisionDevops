@@ -1,7 +1,7 @@
 import { CommandDrill } from "@/types/game";
 
 export const commandDrillsData: CommandDrill[] = [
-  // ==================== JUNIOR ====================
+  // ==================== JUNIOR (12 Drills) ====================
   {
     id: "drill-jr-1",
     difficulty: "Junior",
@@ -88,8 +88,94 @@ export const commandDrillsData: CommandDrill[] = [
       "'git clone <url>' (Slide S113) copie intégralement le dépôt distant, crée automatiquement le remote 'origin' et extrait la branche par défaut.",
     hint: "Syntaxe : git clone <url>",
   },
+  {
+    id: "drill-jr-7",
+    difficulty: "Junior",
+    category: "Git Zones & Diff",
+    xpReward: 50,
+    scenarioContext: "Initialisation d'un dépôt local (Slide S62)",
+    prompt: "Initialisez un nouveau dépôt Git vide dans le répertoire courant pour créer le sous-dossier '.git'.",
+    acceptedPatterns: ["^git\\s+init$"],
+    canonicalCommand: "git init",
+    simulatedOutput: "Initialized empty Git repository in /workspace/project/.git/",
+    explanation:
+      "'git init' (Slide S62) crée un nouveau sous-répertoire '.git' contenant toute la structure d'objets et de références du dépôt.",
+    hint: "Commande d'initialisation de base en deux mots.",
+  },
+  {
+    id: "drill-jr-8",
+    difficulty: "Junior",
+    category: "Git Zones & Diff",
+    xpReward: 50,
+    scenarioContext: "Inspection de l'état des fichiers (Slide S64)",
+    prompt: "Vérifiez quels fichiers sont modifiés, indexés (staged) ou non suivis (untracked) dans votre dépôt.",
+    acceptedPatterns: ["^git\\s+status(\\s+-s|\\s+--short)?$"],
+    canonicalCommand: "git status",
+    simulatedOutput: "On branch main\nChanges to be committed:\n  modified:   README.md\nUntracked files:\n  notes.txt",
+    explanation:
+      "'git status' (Slide S64) affiche l'état exact des fichiers entre le Working Directory et la Staging Area.",
+    hint: "Utilisez 'git status'.",
+  },
+  {
+    id: "drill-jr-9",
+    difficulty: "Junior",
+    category: "Branches & HEAD",
+    xpReward: 55,
+    scenarioContext: "Basculement de branche (Slide S91)",
+    prompt: "Basculez le pointeur HEAD vers la branche existante 'testing'.",
+    acceptedPatterns: ["^git\\s+(checkout|switch)\\s+testing$"],
+    canonicalCommand: "git checkout testing",
+    simulatedOutput: "Switched to branch 'testing'",
+    explanation:
+      "'git checkout testing' ou 'git switch testing' (Slide S91) déplace HEAD pour pointer vers la branche 'testing' et met à jour le répertoire de travail.",
+    hint: "Utilisez 'git checkout testing' ou 'git switch testing'.",
+  },
+  {
+    id: "drill-jr-10",
+    difficulty: "Junior",
+    category: "Git Zones & Diff",
+    xpReward: 60,
+    scenarioContext: "Renommage de fichier suivi (Slide S69)",
+    prompt: "Renommez le fichier suivi 'README.md' en 'README' directement via Git.",
+    acceptedPatterns: ["^git\\s+mv\\s+README\\.md\\s+README$"],
+    canonicalCommand: "git mv README.md README",
+    simulatedOutput: "Renamed README.md -> README (changement automatiquement indexé dans la Staging Area).",
+    explanation:
+      "'git mv file_from file_to' (Slide S69) équivaut à 'mv README.md README' + 'git rm README.md' + 'git add README'.",
+    hint: "Utilisez 'git mv <ancien> <nouveau>'.",
+  },
+  {
+    id: "drill-jr-11",
+    difficulty: "Junior",
+    category: "Git Remotes & CI/CD",
+    xpReward: 55,
+    scenarioContext: "Inspection des serveurs distants (Slide S114)",
+    prompt: "Affichez la liste des dépôts distants (remotes) enregistrés avec leurs URLs de lecture/écriture.",
+    acceptedPatterns: ["^git\\s+remote\\s+-v$"],
+    canonicalCommand: "git remote -v",
+    simulatedOutput: "origin\thttps://github.com/schacon/ticgit (fetch)\norigin\thttps://github.com/schacon/ticgit (push)",
+    explanation:
+      "'git remote -v' (Slide S114) liste les noms courts (ex: origin) et les URLs associées pour fetch et push.",
+    hint: "Ajoutez l'option '-v' à 'git remote'.",
+  },
+  {
+    id: "drill-jr-12",
+    difficulty: "Junior",
+    category: "Branches & HEAD",
+    xpReward: 60,
+    scenarioContext: "Historique condensé en graphe (Slide S70)",
+    prompt: "Affichez l'historique des commits condensé sur une seule ligne par commit avec le graphe ASCII des branches.",
+    acceptedPatterns: [
+      "^git\\s+log\\s+(--oneline\\s+--graph|--graph\\s+--oneline)(\\s+--decorate|\\s+--all)*$",
+    ],
+    canonicalCommand: "git log --oneline --graph",
+    simulatedOutput: "* 56c6f2d (HEAD -> main) Merge branch 'iss53'\n|\\  \n| * 3b58100 Fix issue 53\n* | 4ca87f1 Hotfix prod",
+    explanation:
+      "'git log --oneline --graph' (Slide S70) affiche de manière visuelle la topologie des branches et des fusions dans le terminal.",
+    hint: "Combinez 'git log' avec '--oneline' et '--graph'.",
+  },
 
-  // ==================== MID ====================
+  // ==================== MID (12 Drills) ====================
   {
     id: "drill-mid-1",
     difficulty: "Mid",
@@ -190,8 +276,82 @@ export const commandDrillsData: CommandDrill[] = [
       "Selon le schéma de la Slide S68, 'git diff HEAD' compare directement le Working Directory avec le commit pointé par HEAD.",
     hint: "Passez le pointeur courant en argument à 'git diff'.",
   },
+  {
+    id: "drill-mid-8",
+    difficulty: "Mid",
+    category: "Git Zones & Diff",
+    xpReward: 95,
+    scenarioContext: "Arrêter le suivi d'un fichier sans le supprimer du disque (Slide S69)",
+    prompt: "Retirez le fichier 'application.log' de l'Index (pour que Git cesse de le suivre) TOUT EN LE CONSERVANT sur votre disque dur dans le Working Directory.",
+    acceptedPatterns: ["^git\\s+rm\\s+--cached\\s+application\\.log$"],
+    canonicalCommand: "git rm --cached application.log",
+    simulatedOutput: "rm 'application.log' (supprimé de l'Index mais conservé dans le Working Directory).",
+    explanation:
+      "'git rm --cached <file>' (Slide S69) retire le fichier de la zone d'indexation sans l'effacer du système de fichiers local.",
+    hint: "Utilisez 'git rm' avec l'option '--cached'.",
+  },
+  {
+    id: "drill-mid-9",
+    difficulty: "Mid",
+    category: "Reset & Rescue",
+    xpReward: 95,
+    scenarioContext: "Annulation des modifications locales d'un fichier (Slide S67 / S72)",
+    prompt: "Écrasez vos modifications locales non indexées sur le fichier 'benchmarks.rb' en restaurant sa version issue de l'Index.",
+    acceptedPatterns: [
+      "^git\\s+(checkout\\s+--\\s+benchmarks\\.rb|restore\\s+benchmarks\\.rb)$",
+    ],
+    canonicalCommand: "git checkout -- benchmarks.rb",
+    simulatedOutput: "Updated 1 path from the index (modifications locales sur benchmarks.rb annulées).",
+    explanation:
+      "'git checkout -- <file>' (Slide S67/S130) remplace le fichier du Working Directory par la version présente dans la Staging Area.",
+    hint: "Utilisez 'git checkout -- benchmarks.rb'.",
+  },
+  {
+    id: "drill-mid-10",
+    difficulty: "Mid",
+    category: "Branches & HEAD",
+    xpReward: 90,
+    scenarioContext: "Audit des branches déjà fusionnées (Slide S101)",
+    prompt: "Affichez la liste des branches locales qui ont déjà été intégralement fusionnées dans la branche courante.",
+    acceptedPatterns: ["^git\\s+branch\\s+--merged$"],
+    canonicalCommand: "git branch --merged",
+    simulatedOutput: "  iss53\n* main",
+    explanation:
+      "'git branch --merged' (Slide S101) filtre les branches dont tous les commits sont déjà atteignables depuis HEAD (elles peuvent être supprimées sans risque avec -d).",
+    hint: "Utilisez 'git branch' avec l'option '--merged'.",
+  },
+  {
+    id: "drill-mid-11",
+    difficulty: "Mid",
+    category: "Branches & HEAD",
+    xpReward: 90,
+    scenarioContext: "Création d'un tag annoté de release (Slide S131)",
+    prompt: "Créez un tag annoté nommé 'v1.4' avec le message \"my version 1.4\".",
+    acceptedPatterns: [
+      "^git\\s+tag\\s+-a\\s+v1\\.4\\s+-m\\s+[\"']my version 1\\.4[\"']$",
+    ],
+    canonicalCommand: 'git tag -a v1.4 -m "my version 1.4"',
+    simulatedOutput: "Tag annoté 'v1.4' créé avec somme de contrôle SHA-1, auteur et date.",
+    explanation:
+      "'git tag -a <tag> -m <msg>' crée un objet tag complet dans la base Git (contrairement à un tag léger).",
+    hint: "Combinez 'git tag -a v1.4' avec '-m \"my version 1.4\"'.",
+  },
+  {
+    id: "drill-mid-12",
+    difficulty: "Mid",
+    category: "Git Remotes & CI/CD",
+    xpReward: 95,
+    scenarioContext: "Renommage d'un alias de dépôt distant (Slide S120)",
+    prompt: "Renommez le dépôt distant 'pb' en 'paul'.",
+    acceptedPatterns: ["^git\\s+remote\\s+rename\\s+pb\\s+paul$"],
+    canonicalCommand: "git remote rename pb paul",
+    simulatedOutput: "Remote 'pb' renommé en 'paul' (les branches pb/* deviennent paul/*).",
+    explanation:
+      "'git remote rename <ancien> <nouveau>' (Slide S120) modifie le nom court du remote et met à jour toutes ses branches de suivi distantes.",
+    hint: "Syntaxe : git remote rename <ancien> <nouveau>",
+  },
 
-  // ==================== DEVOPS LEAD ====================
+  // ==================== DEVOPS LEAD (12 Drills) ====================
   {
     id: "drill-lead-1",
     difficulty: "DevOps Lead",
@@ -291,5 +451,78 @@ export const commandDrillsData: CommandDrill[] = [
     explanation:
       "'git push origin --delete serverfix' (Slide S125) demande au serveur distant 'origin' de supprimer la référence de branche distante devenue inutile.",
     hint: "Utilisez 'git push origin --delete <branche>'.",
+  },
+  {
+    id: "drill-lead-8",
+    difficulty: "DevOps Lead",
+    category: "Merge & Rebase",
+    xpReward: 145,
+    scenarioContext: "Greffe de sous-branche sans checkout préalable (Slide S104)",
+    prompt: "Rejouez les commits de la branche 'client' (créée depuis 'server') directement sur 'master' en une seule commande rebase --onto.",
+    acceptedPatterns: ["^git\\s+rebase\\s+--onto\\s+master\\s+server\\s+client$"],
+    canonicalCommand: "git rebase --onto master server client",
+    simulatedOutput: "First, rewinding head to replay your work on top of it...\nApplying: client changes onto master",
+    explanation:
+      "'git rebase --onto master server client' (Slide S104) extrait les modifications propres à 'client' (qui ne sont pas dans 'server') et les rejoue sur 'master'.",
+    hint: "Syntaxe : git rebase --onto <base> <parent-exclu> <branche-cible>",
+  },
+  {
+    id: "drill-lead-9",
+    difficulty: "DevOps Lead",
+    category: "Branches & HEAD",
+    xpReward: 125,
+    scenarioContext: "Création d'une branche de suivi (Tracking Branch) (Slide S122)",
+    prompt: "Créez et basculez automatiquement sur une branche locale 'serverfix' configurée pour suivre 'origin/serverfix'.",
+    acceptedPatterns: [
+      "^git\\s+(checkout|switch)\\s+--track\\s+origin/serverfix$",
+      "^git\\s+checkout\\s+-b\\s+serverfix\\s+origin/serverfix$",
+    ],
+    canonicalCommand: "git checkout --track origin/serverfix",
+    simulatedOutput: "Branch 'serverfix' set up to track remote branch 'serverfix' from 'origin'.\nSwitched to a new branch 'serverfix'",
+    explanation:
+      "'git checkout --track origin/serverfix' (ou '-b serverfix origin/serverfix', Slide S122) crée une branche locale de suivi liée au remote.",
+    hint: "Utilisez 'git checkout --track origin/serverfix'.",
+  },
+  {
+    id: "drill-lead-10",
+    difficulty: "DevOps Lead",
+    category: "Branches & HEAD",
+    xpReward: 125,
+    scenarioContext: "Suppression forcée d'une branche non fusionnée (Slide S102)",
+    prompt: "Forcez la suppression de la branche locale expérimentale 'testing' bien qu'elle contienne des commits non fusionnés.",
+    acceptedPatterns: ["^git\\s+branch\\s+-D\\s+testing$"],
+    canonicalCommand: "git branch -D testing",
+    simulatedOutput: "Deleted branch testing (was 3b58100) [suppression forcée].",
+    explanation:
+      "Contrairement à '-d' qui refuse de supprimer une branche non fusionnée (Slide S102), '-D' force la suppression immédiate du pointeur.",
+    hint: "Utilisez 'git branch' avec le drapeau '-D' majuscule.",
+  },
+  {
+    id: "drill-lead-11",
+    difficulty: "DevOps Lead",
+    category: "Merge & Rebase",
+    xpReward: 135,
+    scenarioContext: "Fusion explicite sans Fast-Forward (Git Flow Release)",
+    prompt: "Fusionnez la branche 'feature/auth' dans la branche courante en forçant la création d'un commit de fusion même si un Fast-Forward est possible.",
+    acceptedPatterns: ["^git\\s+merge\\s+--no-ff\\s+feature/auth$"],
+    canonicalCommand: "git merge --no-ff feature/auth",
+    simulatedOutput: "Merge made by the 'ort' strategy (commit de merge créé explicitement via --no-ff).",
+    explanation:
+      "'git merge --no-ff <branch>' préserve la trace historique de l'existence d'une branche de fonctionnalité en générant toujours un commit à 2 parents.",
+    hint: "Ajoutez l'option '--no-ff' à 'git merge'.",
+  },
+  {
+    id: "drill-lead-12",
+    difficulty: "DevOps Lead",
+    category: "Git Remotes & CI/CD",
+    xpReward: 125,
+    scenarioContext: "Inspection détaillée d'un serveur distant (Slide S119)",
+    prompt: "Affichez les informations complètes du serveur distant 'origin' (URLs, branches distantes suivies et configuration de git pull/push).",
+    acceptedPatterns: ["^git\\s+remote\\s+show\\s+origin$"],
+    canonicalCommand: "git remote show origin",
+    simulatedOutput: "* remote origin\n  Fetch URL: https://github.com/org/repo.git\n  HEAD branch: main\n  Remote branches: main tracked, develop tracked",
+    explanation:
+      "'git remote show origin' (Slide S119) inspecte l'état en direct des branches sur le serveur et leur correspondance avec vos branches locales.",
+    hint: "Syntaxe : git remote show <remote>",
   },
 ];

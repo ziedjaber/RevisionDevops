@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useRef, useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 /**
@@ -25,7 +25,12 @@ export function Card3DTilt({
   ...props
 }: Card3DTiltProps) {
   const ref = useRef<HTMLDivElement>(null);
-  const [tilt, setTilt] = useState({ rotateX: 0, rotateY: 0, glareX: 50, glareY: 50 });
+  const [tilt, setTilt] = useState({
+    rotateX: 0,
+    rotateY: 0,
+    glareX: 50,
+    glareY: 50,
+  });
   const [hovered, setHovered] = useState(false);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -94,7 +99,8 @@ export function Card3DTilt({
  * Inspira UI — GlowButton
  * High-contrast action button with glowing border aura for [Tester la commande] / [Exécuter].
  */
-interface GlowButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+interface GlowButtonProps
+  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   children: React.ReactNode;
   variant?: "indigo" | "emerald" | "amber";
   size?: "sm" | "md";
@@ -179,6 +185,49 @@ export function TypewriterTerminalText({
       {showCursor && displayed.length < text.length && (
         <span className="ml-0.5 inline-block h-3.5 w-1.5 translate-y-0.5 bg-emerald-400 animate-pulse" />
       )}
+    </span>
+  );
+}
+
+/**
+ * Inspira UI — FlipWords
+ * Smoothly cycles through key engineering terms with spring physics.
+ */
+export function FlipWords({
+  words,
+  intervalMs = 2600,
+  className,
+}: {
+  words: string[];
+  intervalMs?: number;
+  className?: string;
+}) {
+  const [idx, setIdx] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setIdx((prev) => (prev + 1) % words.length);
+    }, intervalMs);
+    return () => clearInterval(timer);
+  }, [words.length, intervalMs]);
+
+  return (
+    <span className="relative inline-flex items-center overflow-hidden">
+      <AnimatePresence mode="wait">
+        <motion.span
+          key={words[idx]}
+          initial={{ opacity: 0, y: 8, filter: "blur(4px)" }}
+          animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+          exit={{ opacity: 0, y: -8, filter: "blur(4px)" }}
+          transition={{ duration: 0.25 }}
+          className={cn(
+            "inline-block font-mono font-semibold text-indigo-400",
+            className
+          )}
+        >
+          {words[idx]}
+        </motion.span>
+      </AnimatePresence>
     </span>
   );
 }

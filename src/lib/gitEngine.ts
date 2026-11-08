@@ -247,6 +247,111 @@ export function getPresetState(preset: string): GitRepoState {
     };
   }
 
+  if (preset === "arena-amend") {
+    const c1 = "c1a012a";
+    const c2 = "ed489a1";
+
+    const commits: Record<string, GitCommit> = {
+      [c1]: { hash: c1, shortHash: c1, parents: [], message: "chore: init REST API", author: "DevOps", timestamp: "2j", lane: 0 },
+      [c2]: { hash: c2, shortHash: c2, parents: [c1], message: "feat: add CORS middleware (incomplete)", author: "Junior", timestamp: "2m", lane: 0 },
+    };
+
+    return {
+      commits,
+      branches: {
+        main: { name: "main", targetHash: c2, isCurrent: true, color: "#10B981" },
+      },
+      tags: { "v1.0": c1 },
+      head: { type: "branch", target: "main" },
+      stagingArea: [],
+      workingDirectory: ["src/config/cors.ts"],
+      stash: [],
+      currentLaneCount: 1,
+    };
+  }
+
+  if (preset === "arena-stash") {
+    const c1 = "c1a012a";
+    const c2 = "c2b345b";
+    const f1 = "f100a22";
+
+    const commits: Record<string, GitCommit> = {
+      [c1]: { hash: c1, shortHash: c1, parents: [], message: "chore: init repo", author: "Lead", timestamp: "3j", lane: 0 },
+      [c2]: { hash: c2, shortHash: c2, parents: [c1], message: "release: prod v1.0.4", author: "Lead", timestamp: "1j", lane: 0 },
+      [f1]: { hash: f1, shortHash: f1, parents: [c2], message: "feat: start OAuth2 provider", author: "You", timestamp: "1h", lane: 1 },
+    };
+
+    return {
+      commits,
+      branches: {
+        main: { name: "main", targetHash: c2, isCurrent: false, color: "#10B981" },
+        "feature/oauth": { name: "feature/oauth", targetHash: f1, isCurrent: true, color: "#06B6D4" },
+      },
+      tags: { "v1.0.4": c2 },
+      head: { type: "branch", target: "feature/oauth" },
+      stagingArea: ["src/auth/jwt.ts"],
+      workingDirectory: ["src/auth/oauth-client.ts"],
+      stash: [],
+      currentLaneCount: 2,
+    };
+  }
+
+  if (preset === "arena-soft-squash") {
+    const c1 = "c1a012a";
+    const c2 = "c2b345b";
+    const wip1 = "w10011a";
+    const wip2 = "w20022b";
+
+    const commits: Record<string, GitCommit> = {
+      [c1]: { hash: c1, shortHash: c1, parents: [], message: "chore: bootstrap project", author: "Lead", timestamp: "3j", lane: 0 },
+      [c2]: { hash: c2, shortHash: c2, parents: [c1], message: "feat: core user service", author: "Lead", timestamp: "1j", lane: 0 },
+      [wip1]: { hash: wip1, shortHash: wip1, parents: [c2], message: "wip: temporary console.log debug", author: "Dev", timestamp: "30m", lane: 0 },
+      [wip2]: { hash: wip2, shortHash: wip2, parents: [wip1], message: "wip: fix typo in draft", author: "Dev", timestamp: "10m", lane: 0 },
+    };
+
+    return {
+      commits,
+      branches: {
+        main: { name: "main", targetHash: wip2, isCurrent: true, color: "#10B981" },
+      },
+      tags: { "v1.0": c2 },
+      head: { type: "branch", target: "main" },
+      stagingArea: [],
+      workingDirectory: [],
+      stash: [],
+      currentLaneCount: 1,
+    };
+  }
+
+  if (preset === "arena-rebase-onto") {
+    const c1 = "c1a012a";
+    const c2 = "c2b345b";
+    const s1 = "169a600";
+    const cl1 = "2c33a00";
+
+    const commits: Record<string, GitCommit> = {
+      [c1]: { hash: c1, shortHash: c1, parents: [], message: "chore: initial commit", author: "Lead", timestamp: "4j", lane: 0 },
+      [c2]: { hash: c2, shortHash: c2, parents: [c1], message: "feat: main stable API", author: "Lead", timestamp: "3j", lane: 0 },
+      [s1]: { hash: s1, shortHash: s1, parents: [c1], message: "feat: server cluster (not ready)", author: "ServerTeam", timestamp: "2j", lane: 1 },
+      [cl1]: { hash: cl1, shortHash: cl1, parents: [s1], message: "feat: client UI validation ready", author: "ClientTeam", timestamp: "1j", lane: 2 },
+    };
+
+    return {
+      commits,
+      branches: {
+        main: { name: "main", targetHash: c2, isCurrent: false, color: "#10B981" },
+        server: { name: "server", targetHash: s1, isCurrent: false, color: "#F59E0B" },
+        client: { name: "client", targetHash: cl1, isCurrent: true, color: "#06B6D4" },
+      },
+      tags: { "v1.0": c2 },
+      head: { type: "branch", target: "client" },
+      stagingArea: [],
+      workingDirectory: [],
+      stash: [],
+      currentLaneCount: 3,
+    };
+  }
+
   return getInitialRepoState();
 }
 

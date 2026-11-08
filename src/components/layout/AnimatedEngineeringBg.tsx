@@ -10,7 +10,7 @@ import {
   PillIndicator,
   PillStatus,
 } from "@/components/ui/kibo-ui";
-import { DotPattern } from "@/components/ui/magic-ui";
+import { DotPattern, CommandMarquee } from "@/components/ui/magic-ui";
 import {
   CommitNetworkParticles,
   AuroraTerminalBg,
@@ -18,7 +18,19 @@ import {
   ShinyText,
   SpotlightDivider,
 } from "@/components/ui/react-bits";
+import { FlipWords } from "@/components/ui/inspira-ui";
 import { ArrowUpRight } from "lucide-react";
+
+const MARQUEE_COMMANDS = [
+  "$ git rebase --onto master server client",
+  "$ git reset --soft HEAD~3",
+  "$ git cherry-pick 2c33a99",
+  "$ git diff --staged",
+  "$ git commit --amend",
+  "$ git switch -c fix/memory-leak",
+  "$ git push origin --delete serverfix",
+  "$ git checkout --track origin/serverfix",
+];
 
 /**
  * Global background combining:
@@ -50,31 +62,59 @@ interface WorkspaceOverviewHeaderProps {
 
 const MODE_META: Record<
   GameMode,
-  { tag: string; announcement: string; title: string; subtitle: string }
+  {
+    tag: string;
+    announcement: string;
+    title: string;
+    subtitle: string;
+    flipWords: string[];
+  }
 > = {
   arena: {
-    tag: "Mode 1 · Arena",
+    tag: "Mode 1 · 12 Incidents",
     announcement:
-      "Gitgraph.js + Magic UI BorderBeam + Inspira UI 3D Tilt Cards",
+      "12 Scénarios Prod · Gitgraph.js + Magic UI BorderBeam + Inspira 3D Tilt",
     title: "Production Incident Arena",
     subtitle:
-      "Résolvez des incidents Git & DevOps réels pas à pas sur le graphe de commits interactif Gitgraph.js.",
+      "Résolvez 12 incidents Git & DevOps réels pas à pas sur le graphe de commits interactif :",
+    flipWords: [
+      "Detached HEAD",
+      "Rebase --onto",
+      "GitFlow Hotfix",
+      "3-Way Merge",
+      "Cherry-Pick",
+      "Reset --soft",
+    ],
   },
   drills: {
-    tag: "Mode 2 · CLI Drills",
+    tag: "Mode 2 · 36 CLI Drills",
     announcement:
-      "20 drills Git & CI/CD · Inspira UI Typewriter + GlowButton + AutoAnimate",
+      "36 Drills Git & CI/CD · Inspira UI Typewriter + GlowButton + AutoAnimate",
     title: "Interactive CLI Command Drills",
     subtitle:
-      "Tapez et testez la commande exacte dans le terminal immersif React Bits Aurora pour augmenter votre multiplicateur de série.",
+      "Maîtrisez les 36 commandes essentielles en direct dans le terminal Aurora :",
+    flipWords: [
+      "git diff --staged",
+      "git commit --amend",
+      "git rm --cached",
+      "git rebase --onto",
+      "git remote show",
+    ],
   },
   quiz: {
-    tag: "Mode 3 · Speed Quiz",
+    tag: "Mode 3 · 40 Questions",
     announcement:
-      "24 questions chronométrées (Junior, Mid, DevOps Lead) + Canvas Confetti",
+      "40 Questions Chronométrées (Junior, Mid, DevOps Lead) + Canvas Confetti",
     title: "Timed DevOps & Git Assessment",
     subtitle:
-      "Évaluez vos réflexes sous pression temporelle avec enregistrement automatique dans le coffre Post-Mortem.",
+      "Évaluez votre maîtrise sous pression temporelle sur 40 questions couvrant :",
+    flipWords: [
+      "3 Zones Git",
+      "CAMS & MTTR",
+      "REST & Microservices",
+      "GitFlow vs Trunk",
+      "GitLab CI Runners",
+    ],
   },
   sandbox: {
     tag: "Mode 4 · Gitgraph.js",
@@ -82,15 +122,29 @@ const MODE_META: Record<
       "Graphe de commits DAG + AutoAnimate 3-Zones Working Dir ↔ Index ↔ .git",
     title: "Gitgraph.js Interactive Commit Simulator",
     subtitle:
-      "Expérimentez librement avec les branches, fast-forward vs 3-way merges, rebase, tags et les 3 zones locales animées par AutoAnimate.",
+      "Expérimentez librement avec les branches, merges, rebases, tags et les 3 zones locales :",
+    flipWords: [
+      "Working Directory",
+      "Staging Area (Index)",
+      "Local Repo (.git)",
+      "Fast-Forward",
+      "3-Way Merge",
+    ],
   },
   profile: {
-    tag: "Diagnostics & Gamification",
+    tag: "18 Badges & Post-Mortem",
     announcement:
-      "12 Badges de compétences + Coffre d'erreurs Post-Mortem animé",
+      "18 Badges de compétences + Coffre d'erreurs Post-Mortem animé",
     title: "Skill Badges & Post-Mortem Error Vault",
     subtitle:
-      "Suivez votre progression XP, vos badges débloqués et l'analyse comparative de vos erreurs CLI.",
+      "Suivez votre progression XP, vos 18 badges et l'analyse comparative de vos erreurs :",
+    flipWords: [
+      "Bronze Tier",
+      "Silver Tier",
+      "Gold Tier",
+      "Diamond Tier",
+      "Zero-Error Run",
+    ],
   },
 };
 
@@ -120,8 +174,9 @@ export function WorkspaceOverviewHeader({
               <span>Progression</span>
             </PillStatus>
             <span className="font-mono">
-              {stats.solvedArenaIds.length}/6 incidents ·{" "}
-              {stats.completedDrillIds.length}/20 drills
+              {stats.solvedArenaIds.length}/12 incidents ·{" "}
+              {stats.completedDrillIds.length}/36 drills ·{" "}
+              {stats.unlockedBadgeIds.length}/18 badges
             </span>
           </Pill>
         </div>
@@ -131,10 +186,14 @@ export function WorkspaceOverviewHeader({
         <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
           <DecryptedText text={meta.title} speed={18} />
         </h1>
-        <p className="text-sm text-muted-foreground mt-1">{meta.subtitle}</p>
+        <p className="text-sm text-muted-foreground mt-1 flex flex-wrap items-center gap-1.5">
+          <span>{meta.subtitle}</span>
+          <FlipWords words={meta.flipWords} />
+        </p>
       </div>
 
-      <SpotlightDivider className="mt-1" />
+      <CommandMarquee items={MARQUEE_COMMANDS} />
+      <SpotlightDivider />
     </div>
   );
 }

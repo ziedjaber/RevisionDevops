@@ -1,7 +1,7 @@
 import { TimedQuizQuestion } from "@/types/game";
 
 export const timedQuizData: TimedQuizQuestion[] = [
-  // ==================== JUNIOR (8 Questions) ====================
+  // ==================== JUNIOR (13 Questions) ====================
   {
     id: "q-jr-1",
     difficulty: "Junior",
@@ -133,8 +133,93 @@ export const timedQuizData: TimedQuizQuestion[] = [
     explanation:
       "HEAD (Slide S65 / S133) est le pointeur spécial indiquant votre position courante dans le graphe de commits (généralement rattaché à la branche active).",
   },
+  {
+    id: "q-jr-9",
+    difficulty: "Junior",
+    category: "REST & HTTP",
+    timeLimitSec: 30,
+    basePoints: 100,
+    question: "Quelle est la correspondance exacte entre les opérations CRUD (Create, Read, Update, Delete) et les verbes HTTP REST (Slide S21) ?",
+    options: [
+      "Create = GET, Read = POST, Update = DELETE, Delete = PUT",
+      "Create = POST, Read = GET, Update = PUT (ou PATCH), Delete = DELETE",
+      "Create = PUT, Read = HEAD, Update = OPTIONS, Delete = POST",
+      "Create = CONNECT, Read = TRACE, Update = POST, Delete = GET",
+    ],
+    correctIndex: 1,
+    explanation:
+      "Slide S21 : POST crée une ressource, GET la lit, PUT/PATCH la met à jour et DELETE la supprime.",
+  },
+  {
+    id: "q-jr-10",
+    difficulty: "Junior",
+    category: "Codes HTTP REST",
+    timeLimitSec: 30,
+    basePoints: 100,
+    question: "Dans une API REST (Slide S25), que signifie un code de statut HTTP de la famille 2xx (ex: 200 OK, 201 Created) vs 4xx (ex: 400, 404) ?",
+    options: [
+      "2xx = Erreur serveur ; 4xx = Succès",
+      "2xx = Requête traitée avec succès ; 4xx = Erreur côté client (requête invalide ou ressource introuvable)",
+      "2xx = Redirection ; 4xx = Connexion réseau coupée",
+      "2xx = Base de données pleine ; 4xx = Mot de passe expiré uniquement",
+    ],
+    correctIndex: 1,
+    explanation:
+      "Slide S25 : 2xx indique un succès (200 OK, 201 Created, 204 No Content), 4xx une erreur client (400 Bad Request, 401 Unauthorized, 404 Not Found) et 5xx une erreur serveur.",
+  },
+  {
+    id: "q-jr-11",
+    difficulty: "Junior",
+    category: "Git États de Fichiers",
+    timeLimitSec: 30,
+    basePoints: 100,
+    question: "Quels sont les trois états principaux dans lesquels un fichier suivi par Git peut se trouver (Slide S59) ?",
+    options: [
+      "Public, Private, Protected",
+      "Modified (modifié), Staged (indexé), Committed (validé)",
+      "Created, Updated, Deleted",
+      "Local, Remote, Cloud",
+    ],
+    correctIndex: 1,
+    explanation:
+      "Slide S59 : Un fichier suivi est soit Modified (modifié dans le Working Directory), Staged (marqué dans l'Index pour le prochain commit), ou Committed (stocké dans la base .git).",
+  },
+  {
+    id: "q-jr-12",
+    difficulty: "Junior",
+    category: "Git Ignore",
+    timeLimitSec: 30,
+    basePoints: 100,
+    question: "À quoi sert le fichier '.gitignore' à la racine d'un dépôt Git (Slide S67) ?",
+    options: [
+      "À supprimer automatiquement les branches distantes",
+      "À définir les motifs (globs) de fichiers générés ou sensibles (logs, build/, .env) que Git ne doit ni suivre ni indexer automatiquement",
+      "À bloquer l'accès aux développeurs juniors",
+      "À chiffrer les mots de passe dans les commits",
+    ],
+    correctIndex: 1,
+    explanation:
+      "Slide S67 : Le fichier '.gitignore' liste les motifs de fichiers (ex: *.o, *.a, *~, build/) que Git doit ignorer comme fichiers non suivis.",
+  },
+  {
+    id: "q-jr-13",
+    difficulty: "Junior",
+    category: "Conflit Dev vs Ops",
+    timeLimitSec: 30,
+    basePoints: 100,
+    question: "Quel conflit historique (« Le Mur de la Confusion », Slide S38) le mouvement DevOps cherche-t-il à résoudre ?",
+    options: [
+      "Le conflit entre les développeurs Frontend et Backend",
+      "L'opposition entre l'équipe Dev (qui veut livrer le changement rapidement) et l'équipe Ops (qui veut préserver la stabilité de la production)",
+      "La concurrence entre Linux et Windows",
+      "Le choix entre JSON et XML",
+    ],
+    correctIndex: 1,
+    explanation:
+      "Slide S38 : Dev est poussé par l'agilité et la nouveauté, tandis qu'Ops cherche la stabilité. DevOps abat ce mur en unifiant la culture, les outils et la responsabilité.",
+  },
 
-  // ==================== MID (8 Questions) ====================
+  // ==================== MID (13 Questions) ====================
   {
     id: "q-mid-1",
     difficulty: "Mid",
@@ -236,7 +321,7 @@ export const timedQuizData: TimedQuizQuestion[] = [
     ],
     correctIndex: 1,
     explanation:
-      "Slide S158 : Si le pipeline CI échoue, la Merge Request est signalée invalide et ne doit pas être mergée tant que un nouveau commit ne corrige pas le build.",
+      "Slide S158 : Si le pipeline CI échoue, la Merge Request est signalée invalide et ne doit pas être mergée tant qu'un nouveau commit ne corrige pas le build.",
   },
   {
     id: "q-mid-7",
@@ -272,8 +357,93 @@ export const timedQuizData: TimedQuizQuestion[] = [
     explanation:
       "Slide S82 / S99 : Au lieu d'un Fast-Forward impossible, Git réalise une fusion à 3 points entre l'ancêtre commun et les deux pointes de branches, créant un nouveau commit de fusion à 2 parents.",
   },
+  {
+    id: "q-mid-9",
+    difficulty: "Mid",
+    category: "SOA vs Microservices",
+    timeLimitSec: 35,
+    basePoints: 150,
+    question: "Quelle différence d'architecture sépare la SOA (Service-Oriented Architecture) des Microservices concernant la base de données et la communication (Slides S12–S16) ?",
+    options: [
+      "Les Microservices partagent tous une seule base de données globale et un bus ESB lourd",
+      "La SOA partage souvent un ESB (Enterprise Service Bus) et une base de données commune, tandis que chaque Microservice possède sa propre base de données isolée et communique via des protocoles légers (REST / API Gateway)",
+      "La SOA interdit l'utilisation du réseau",
+      "Les Microservices s'exécutent dans un seul processus monolithique",
+    ],
+    correctIndex: 1,
+    explanation:
+      "Slides S12–S16 : La SOA centralise l'orchestration via un ESB lourd et partage souvent les données, alors que chaque microservice est déployable indépendamment avec son propre stockage (Database per Service).",
+  },
+  {
+    id: "q-mid-10",
+    difficulty: "Mid",
+    category: "Conflits de Merge Git",
+    timeLimitSec: 35,
+    basePoints: 150,
+    question: "Lors d'un conflit de fusion (Merge Conflict, Slide S100), comment devez-vous valider la résolution une fois les marqueurs <<<<<<<, =======, >>>>>>> nettoyés ?",
+    options: [
+      "Exécuter git merge --conflict",
+      "Exécuter 'git add <fichier>' pour marquer le conflit comme résolu dans l'Index, puis 'git commit' pour finaliser le commit de fusion",
+      "Supprimer le dossier .git et recommencer",
+      "Exécuter git push --force immédiatement",
+    ],
+    correctIndex: 1,
+    explanation:
+      "Slide S100 : Dans Git, indexer le fichier avec 'git add <fichier>' indique à Git que le conflit est résolu, puis 'git commit' scelle la fusion.",
+  },
+  {
+    id: "q-mid-11",
+    difficulty: "Mid",
+    category: "Git Suppression & Index",
+    timeLimitSec: 35,
+    basePoints: 150,
+    question: "Quelle est la différence entre 'git rm fichier.log' et 'git rm --cached fichier.log' (Slide S69) ?",
+    options: [
+      "Aucune différence",
+      "'git rm' supprime le fichier de l'Index ET du répertoire de travail, tandis que 'git rm --cached' le retire uniquement de l'Index tout en le conservant sur le disque",
+      "'git rm --cached' vide toute la mémoire RAM",
+      "'git rm' supprime l'historique de tous les commits précédents",
+    ],
+    correctIndex: 1,
+    explanation:
+      "Slide S69 : '--cached' est indispensable lorsqu'on a indexé/suivi un fichier par erreur (ex: log ou .env) et qu'on veut arrêter de le suivre sans l'effacer du disque local.",
+  },
+  {
+    id: "q-mid-12",
+    difficulty: "Mid",
+    category: "GitHub Flow vs GitLab Flow",
+    timeLimitSec: 35,
+    basePoints: 150,
+    question: "Que rajoute 'GitLab Flow' par rapport à la simplicité de 'GitHub Flow' (Slides S106–S107) ?",
+    options: [
+      "Il interdit les Merge Requests",
+      "Il introduit des branches d'environnement ou de release (ex: pre-production, production) pour contrôler le flux entre l'intégration sur main et les déploiements multi-environnements",
+      "Il oblige à travailler sans branches",
+      "Il supprime les tests automatisés",
+    ],
+    correctIndex: 1,
+    explanation:
+      "Slides S106–S107 : GitHub Flow n'a que main + branches de fonctionnalités, tandis que GitLab Flow ajoute des branches liées aux environnements (staging, production) ou aux releases.",
+  },
+  {
+    id: "q-mid-13",
+    difficulty: "Mid",
+    category: "Branches Distantes",
+    timeLimitSec: 35,
+    basePoints: 150,
+    question: "Que représente une référence de type 'origin/master' (Remote-Tracking Branch, Slide S112) dans votre dépôt local ?",
+    options: [
+      "Une branche locale sur laquelle vous pouvez directement faire des commits",
+      "Un signet (pointeur local en lecture seule) qui mémorise la dernière position connue de la branche 'master' sur le serveur 'origin'",
+      "Un dossier contenant les mots de passe SSH",
+      "Une branche supprimée",
+    ],
+    correctIndex: 1,
+    explanation:
+      "Slide S112 : Les branches de suivi distantes (origin/master) sont des références locales que vous ne pouvez pas déplacer vous-même ; elles se mettent à jour lors des communications réseau (git fetch / git push).",
+  },
 
-  // ==================== DEVOPS LEAD (8 Questions) ====================
+  // ==================== DEVOPS LEAD (14 Questions) ====================
   {
     id: "q-lead-1",
     difficulty: "DevOps Lead",
@@ -412,5 +582,109 @@ export const timedQuizData: TimedQuizQuestion[] = [
     correctIndex: 1,
     explanation:
       "Slides S45–S46 : Avec DevOps, le MTTR (Mean Time To Recovery) passe de 29h à 7h, tandis que l'équipe investit 10% dans l'automatisation des tests et 10% dans l'automatisation du déploiement.",
+  },
+  {
+    id: "q-lead-9",
+    difficulty: "DevOps Lead",
+    category: "Git Checkout vs Reset sur Fichier",
+    timeLimitSec: 40,
+    basePoints: 200,
+    question: "Quel est l'effet exact de la commande 'git checkout HEAD~ files' par rapport à 'git checkout master' (Slide S72) ?",
+    codeSnippet: "$ git checkout HEAD~ config.yml",
+    options: [
+      "Elle déplace le pointeur HEAD en état Detached HEAD sur HEAD~",
+      "Elle NE déplace PAS HEAD, mais copie la version de 'config.yml' issue du commit HEAD~ à la fois dans l'Index et dans le Working Directory",
+      "Elle supprime la branche courante",
+      "Elle crée un nouveau commit automatiquement",
+    ],
+    correctIndex: 1,
+    explanation:
+      "Slide S72 : Lorsqu'on précise un chemin de fichier ('git checkout HEAD~ files'), Git ne déplace pas HEAD : il écrase le fichier dans l'Index et dans le Working Directory avec la version du commit ciblé.",
+  },
+  {
+    id: "q-lead-10",
+    difficulty: "DevOps Lead",
+    category: "Workflow Gestionnaire d'Intégration",
+    timeLimitSec: 40,
+    basePoints: 200,
+    question: "Dans le workflow distribué « Integration-Manager » (utilisé sur GitHub/GitLab avec les Forks, Slide S127), comment circulent les commits ?",
+    options: [
+      "Tous les développeurs poussent directement avec les droits admin sur le dépôt officiel",
+      "Chaque développeur clone depuis le dépôt officiel (blessed), pousse sur son propre dépôt public (fork), et le mainteneur tire (pull) depuis le dépôt du développeur pour fusionner dans le dépôt officiel",
+      "Les commits sont envoyés par clé USB",
+      "Seul le créateur du projet peut écrire du code",
+    ],
+    correctIndex: 1,
+    explanation:
+      "Slide S127 : Dans le modèle Integration-Manager, chaque contributeur possède son fork public en écriture et demande au gestionnaire d'intégration de tirer ses modifications vers le dépôt de référence.",
+  },
+  {
+    id: "q-lead-11",
+    difficulty: "DevOps Lead",
+    category: "Git Flow Release & Hotfix",
+    timeLimitSec: 40,
+    basePoints: 200,
+    question: "Dans le modèle Git Flow (Slide S108), quelle est la règle exacte de création et de fusion d'une branche 'release/*' vs 'hotfix/*' ?",
+    options: [
+      "release/* part de master ; hotfix/* part de develop",
+      "release/* est créée depuis 'develop' et fusionnée dans 'master' ET 'develop' ; hotfix/* est créée depuis 'master' et fusionnée dans 'master' ET 'develop'",
+      "release/* et hotfix/* ne sont jamais fusionnées dans develop",
+      "hotfix/* remplace définitivement la branche develop",
+    ],
+    correctIndex: 1,
+    explanation:
+      "Slide S108 : Une branche release prépare une nouvelle version à partir de 'develop', tandis qu'un hotfix corrige une urgence à partir de 'master'. Dans les deux cas, les correctifs doivent être fusionnés dans 'master' ET reportés dans 'develop'.",
+  },
+  {
+    id: "q-lead-12",
+    difficulty: "DevOps Lead",
+    category: "Git Rebase --onto 3 Arguments",
+    timeLimitSec: 40,
+    basePoints: 200,
+    question: "Dans le scénario du cours (Slide S104), que réalise exactement la commande à 3 arguments ci-dessous ?",
+    codeSnippet: "$ git rebase --onto master server client",
+    options: [
+      "Elle supprime les branches server et client",
+      "Elle extrait la branche 'client', calcule les patchs introduits depuis sa divergence avec 'server', et les rejoue directement au sommet de 'master'",
+      "Elle fusionne master et server dans client",
+      "Elle renomme server en master",
+    ],
+    correctIndex: 1,
+    explanation:
+      "Slide S104 : 'git rebase --onto master server client' signifie : « Prends la branche client, détermine les modifications depuis l'ancêtre commun avec server, et rejoue-les sur master ».",
+  },
+  {
+    id: "q-lead-13",
+    difficulty: "DevOps Lead",
+    category: "Poussée Distante et Conflit Non-Fast-Forward",
+    timeLimitSec: 40,
+    basePoints: 200,
+    question: "Pourquoi 'git push origin master' est-il rejeté par le serveur si un collègue a poussé un commit entre-temps (Slide S119) ?",
+    options: [
+      "Parce que le serveur distant est hors-ligne",
+      "Parce que votre historique local a divergé de 'origin/master' (rejet non-fast-forward) : vous devez d'abord récupérer et intégrer le travail distant (git fetch + merge/rebase) avant de repousser",
+      "Parce que Git interdit plus d'un push par jour",
+      "Parce qu'il faut supprimer la branche master",
+    ],
+    correctIndex: 1,
+    explanation:
+      "Slide S119 : Git refuse par défaut d'écraser des commits distants qui ne sont pas des ancêtres de votre branche locale. Il faut d'abord tirer/fusionner le travail du collègue.",
+  },
+  {
+    id: "q-lead-14",
+    difficulty: "DevOps Lead",
+    category: "Exécution des Stages GitLab CI",
+    timeLimitSec: 40,
+    basePoints: 200,
+    question: "Comment s'exécutent les 'jobs' appartenant au même 'stage' vs des 'stages' différents dans un pipeline GitLab CI (Slides S159–S163) ?",
+    options: [
+      "Tous les stages s'exécutent en même temps dans le désordre",
+      "Les jobs d'un même stage s'exécutent en parallèle (si plusieurs Runners sont disponibles), et le stage suivant ne démarre que si tous les jobs du stage précédent ont réussi",
+      "Un seul job peut être exécuté par semaine",
+      "Le stage deploy s'exécute toujours avant le stage test",
+    ],
+    correctIndex: 1,
+    explanation:
+      "Slides S159–S163 : Dans GitLab CI, les jobs d'une même étape (ex: test_unit et test_integration dans le stage 'test') tournent en parallèle, et la réussite de l'étape conditionne le passage au stage suivant.",
   },
 ];

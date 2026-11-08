@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useId } from "react";
+import React, { useId, useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 
 /**
@@ -103,5 +103,118 @@ export function BorderBeam({
         className
       )}
     />
+  );
+}
+
+/**
+ * Magic UI — NumberTicker
+ * Smoothly animates numerical counters (XP, score, streaks, metrics).
+ */
+export function NumberTicker({
+  value,
+  className,
+}: {
+  value: number;
+  className?: string;
+}) {
+  const [displayVal, setDisplayVal] = useState(value);
+
+  useEffect(() => {
+    const start = displayVal;
+    const end = value;
+    if (start === end) return;
+    const duration = 420;
+    const startTime = performance.now();
+
+    let rafId: number;
+    const step = (now: number) => {
+      const elapsed = now - startTime;
+      const progress = Math.min(1, elapsed / duration);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setDisplayVal(Math.round(start + (end - start) * eased));
+      if (progress < 1) {
+        rafId = requestAnimationFrame(step);
+      }
+    };
+    rafId = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(rafId);
+  }, [value]);
+
+  return (
+    <span className={cn("tabular-nums tracking-tight", className)}>
+      {displayVal.toLocaleString("en-US")}
+    </span>
+  );
+}
+
+/**
+ * Magic UI — Meteors
+ * Subtle diagonal shooting light trails inside cards and victory banners.
+ */
+export function Meteors({
+  number = 10,
+  className,
+}: {
+  number?: number;
+  className?: string;
+}) {
+  const meteors = Array.from({ length: number }, (_, idx) => ({
+    id: idx,
+    left: `${Math.floor((idx / number) * 100)}%`,
+    delay: `${(idx * 0.65).toFixed(2)}s`,
+    duration: `${3 + (idx % 4)}s`,
+  }));
+
+  return (
+    <div
+      aria-hidden="true"
+      className={cn(
+        "pointer-events-none absolute inset-0 overflow-hidden rounded-[inherit]",
+        className
+      )}
+    >
+      {meteors.map((m) => (
+        <span
+          key={m.id}
+          style={{
+            top: "-10%",
+            left: m.left,
+            animationDelay: m.delay,
+            animationDuration: m.duration,
+          }}
+          className="absolute h-0.5 w-16 rotate-[35deg] bg-gradient-to-r from-indigo-400/60 via-emerald-400/20 to-transparent opacity-40 animate-pulse"
+        />
+      ))}
+    </div>
+  );
+}
+
+/**
+ * Magic UI — CommandMarquee
+ * Subtle horizontal live ticker of Git / DevOps commands.
+ */
+export function CommandMarquee({
+  items,
+  className,
+}: {
+  items: string[];
+  className?: string;
+}) {
+  return (
+    <div
+      className={cn(
+        "relative flex w-full overflow-x-auto no-scrollbar items-center gap-2 py-1",
+        className
+      )}
+    >
+      {items.map((item, idx) => (
+        <span
+          key={idx}
+          className="shrink-0 rounded-md border border-slate-800/80 bg-slate-900/60 px-2 py-0.5 font-mono text-[10px] text-slate-400"
+        >
+          {item}
+        </span>
+      ))}
+    </div>
   );
 }

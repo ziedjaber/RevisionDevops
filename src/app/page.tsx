@@ -11,6 +11,8 @@ import { CommandDrillMode } from "@/components/drills/CommandDrillMode";
 import { TimedQuizArena } from "@/components/quiz/TimedQuizArena";
 import { GitSimulator } from "@/components/simulator/GitSimulator";
 import { SkillBadgesAndErrors } from "@/components/gamification/SkillBadgesAndErrors";
+import { CultFloatingDock } from "@/components/ui/cult-ui";
+import { BorderBeam, Meteors } from "@/components/ui/magic-ui";
 import { badgesData } from "@/data/badgesData";
 import {
   GameMode,
@@ -50,19 +52,32 @@ function computeUnlockedBadges(stats: PlayerStats): string[] {
   }
   if (stats.maxStreak >= 3) unlocked.add("streak-3");
   if (stats.maxStreak >= 7) unlocked.add("streak-7");
+  if (stats.maxStreak >= 12) unlocked.add("streak-12");
+
   if (stats.solvedArenaIds.includes("inc-101-detached-head"))
     unlocked.add("detached-survivor");
+  if (stats.solvedArenaIds.includes("inc-103-commit-amend"))
+    unlocked.add("amend-fixer");
   if (stats.solvedArenaIds.includes("inc-202-3way-merge"))
     unlocked.add("merge-arbiter");
+  if (stats.solvedArenaIds.includes("inc-203-stash-context-switch"))
+    unlocked.add("stash-ninja");
+  if (stats.solvedArenaIds.includes("inc-204-soft-reset-squash"))
+    unlocked.add("soft-squasher");
   if (stats.solvedArenaIds.includes("inc-301-linear-rebase"))
     unlocked.add("rebase-surgeon");
+  if (stats.solvedArenaIds.includes("inc-405-rebase-onto-surgeon"))
+    unlocked.add("onto-specialist");
   if (stats.solvedArenaIds.includes("inc-404-gitflow-hotfix"))
     unlocked.add("hotfix-commander");
-  if (stats.completedDrillIds.length >= 8) unlocked.add("drill-sergeant");
-  if (stats.completedDrillIds.length >= 16) unlocked.add("drill-overlord");
+
+  if (stats.completedDrillIds.length >= 10) unlocked.add("drill-sergeant");
+  if (stats.completedDrillIds.length >= 24) unlocked.add("drill-overlord");
+  if (stats.completedDrillIds.length >= 36) unlocked.add("drill-grandmaster");
+
   if (stats.quizPerfectRuns >= 1) unlocked.add("quiz-sharpshooter");
-  if (stats.xp >= 1000) unlocked.add("xp-1000");
-  if (stats.solvedArenaIds.length >= 6) unlocked.add("arena-champion");
+  if (stats.xp >= 1500) unlocked.add("xp-1000");
+  if (stats.solvedArenaIds.length >= 12) unlocked.add("arena-champion");
 
   return Array.from(unlocked);
 }
@@ -211,25 +226,32 @@ export default function DrillChallengePlatform() {
   };
 
   return (
-    <div className="relative min-h-screen flex flex-col bg-background text-foreground">
+    <div className="relative min-h-screen flex flex-col bg-background text-foreground pb-16">
       <AnimatedEngineeringBg />
 
-      {/* Top Navigation & Gamification Bar (shadcn/ui Tabs + Kibo UI Pills) */}
+      {/* Top Navigation & Gamification Bar */}
       <TopCommandBar
         activeMode={activeMode}
         onSelectMode={setActiveMode}
         stats={stats}
       />
 
-      {/* Badge Unlocked Toast */}
+      {/* Badge Unlocked Toast with Magic UI Meteors + BorderBeam */}
       {recentBadgeName && (
-        <Card className="fixed bottom-6 right-6 z-50 p-4 border-emerald-500/50 bg-card shadow-lg flex items-center gap-3.5">
+        <Card className="fixed bottom-16 right-6 z-50 overflow-hidden p-4 border-emerald-500/50 bg-card shadow-lg flex items-center gap-3.5">
+          <Meteors number={6} />
+          <BorderBeam
+            size={120}
+            duration={6}
+            colorFrom="#10b981"
+            colorTo="#f59e0b"
+          />
           <div className="w-9 h-9 rounded-lg bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
             <Award className="w-4 h-4" />
           </div>
           <div>
             <span className="text-[10px] font-mono text-emerald-400 font-semibold block">
-              Badge Unlocked
+              Nouveau Badge Débloqué !
             </span>
             <span className="text-sm font-bold text-foreground">
               {recentBadgeName}
@@ -286,6 +308,9 @@ export default function DrillChallengePlatform() {
           />
         )}
       </main>
+
+      {/* Cult UI Floating Keyboard Dock */}
+      <CultFloatingDock activeMode={activeMode} onSelectMode={setActiveMode} />
     </div>
   );
 }

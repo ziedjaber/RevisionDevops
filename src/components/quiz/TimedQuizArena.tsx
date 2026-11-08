@@ -228,8 +228,8 @@ export const TimedQuizArena: React.FC<TimedQuizArenaProps> = ({
       },
       {
         level: "All",
-        title: "Marathon Intégral (24 Questions)",
-        desc: "Enchaînez les 24 questions Junior, Mid et DevOps Lead dans un benchmark complet chronométré.",
+        title: "Marathon Intégral (40 Questions)",
+        desc: "Enchaînez les 40 questions Junior (13), Mid (13) et DevOps Lead (14) dans un benchmark complet chronométré.",
         timeLabel: "30-40s / question",
         pointsLabel: "Score Maximum",
         badge: "blue",

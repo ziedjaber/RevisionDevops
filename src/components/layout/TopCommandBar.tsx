@@ -15,7 +15,6 @@ import { Badge } from "@/components/ui/Badge";
 import {
   Pill,
   PillStatus,
-  PillIndicator,
   PillDelta,
   Status,
   StatusIndicator,
@@ -26,6 +25,7 @@ import {
   CultTabItem,
   CultQuickCommandModal,
 } from "@/components/ui/cult-ui";
+import { NumberTicker } from "@/components/ui/magic-ui";
 import { ShinyText } from "@/components/ui/react-bits";
 
 interface TopCommandBarProps {
@@ -39,30 +39,30 @@ export function getRankTitle(xp: number): {
   nextXp: number;
   color: string;
 } {
-  if (xp >= 2500) {
+  if (xp >= 3500) {
     return {
       title: "Principal DevOps Architect",
-      nextXp: 5000,
+      nextXp: 6000,
       color: "text-amber-400",
     };
   }
-  if (xp >= 1200) {
+  if (xp >= 1500) {
     return {
       title: "Staff Release Engineer",
-      nextXp: 2500,
+      nextXp: 3500,
       color: "text-emerald-400",
     };
   }
-  if (xp >= 500) {
+  if (xp >= 600) {
     return {
       title: "Site Reliability Engineer",
-      nextXp: 1200,
+      nextXp: 1500,
       color: "text-sky-400",
     };
   }
   return {
     title: "Junior DevOps Engineer",
-    nextXp: 500,
+    nextXp: 600,
     color: "text-foreground",
   };
 }
@@ -79,19 +79,19 @@ export const TopCommandBar: React.FC<TopCommandBarProps> = ({
       id: "arena",
       label: "1. Incident Arena",
       icon: ShieldAlert,
-      badge: `${stats.solvedArenaIds.length}/6`,
+      badge: `${stats.solvedArenaIds.length}/12`,
     },
     {
       id: "drills",
       label: "2. Command Drills",
       icon: Terminal,
-      badge: `${stats.completedDrillIds.length}/20`,
+      badge: `${stats.completedDrillIds.length}/36`,
     },
     {
       id: "quiz",
       label: "3. Speed Quiz",
       icon: Timer,
-      badge: "24",
+      badge: "40",
     },
     {
       id: "sandbox",
@@ -106,7 +106,7 @@ export const TopCommandBar: React.FC<TopCommandBarProps> = ({
       badge:
         stats.mistakes.length > 0
           ? `${stats.mistakes.length}`
-          : `${stats.unlockedBadgeIds.length}/12`,
+          : `${stats.unlockedBadgeIds.length}/18`,
     },
   ];
 
@@ -134,7 +134,7 @@ export const TopCommandBar: React.FC<TopCommandBarProps> = ({
             </div>
           </div>
 
-          {/* Right: Cult UI Quick Command Modal + Kibo UI Pills & Status */}
+          {/* Right: Cult UI Quick Command Modal + Kibo UI Pills & Magic UI NumberTicker */}
           <div className="flex items-center gap-2">
             <CultQuickCommandModal />
 
@@ -161,9 +161,10 @@ export const TopCommandBar: React.FC<TopCommandBarProps> = ({
                 <Zap className="h-3.5 w-3.5 text-emerald-400" />
                 <span className="font-mono">XP</span>
               </PillStatus>
-              <span className="font-mono font-bold text-foreground">
-                {stats.xp.toLocaleString("en-US")}
-              </span>
+              <NumberTicker
+                value={stats.xp}
+                className="font-mono font-bold text-foreground"
+              />
             </Pill>
           </div>
         </div>

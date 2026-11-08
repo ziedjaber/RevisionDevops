@@ -37,7 +37,7 @@ import {
   SnippetTabsContent,
   SnippetCopyButton,
 } from "@/components/ui/kibo-ui";
-import { BorderBeam } from "@/components/ui/magic-ui";
+import { BorderBeam, Meteors } from "@/components/ui/magic-ui";
 import { Card3DTilt, GlowButton } from "@/components/ui/inspira-ui";
 import { CultSpringTabs, CultTabItem } from "@/components/ui/cult-ui";
 import { cn } from "@/lib/utils";
@@ -404,6 +404,7 @@ export const ProductionArena: React.FC<ProductionArenaProps> = ({
         <div className="lg:col-span-8 space-y-4">
           {justSolvedBanner && (
             <Card className="relative overflow-hidden border-emerald-500/50 bg-emerald-950/20 p-4">
+              <Meteors number={12} />
               <BorderBeam
                 size={160}
                 duration={8}
